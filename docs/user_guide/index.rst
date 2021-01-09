@@ -5,6 +5,13 @@ User Guide
 
 There several major uses for this package and I will try to detail out several examples in this guide.
 
+Installation
+--------------
+
+You can install ``mock-alchemy`` using pip::
+
+    $ pip install mock-alchemy
+
 Quick Examples
 --------------
 
@@ -348,7 +355,7 @@ to check branching in code and verify data values using a mock SqlAlchemy sessio
 Getting and Deleting
 ^^^^^^^^^^^^^^^^^^^^
 
-Let us return the :ref:`previous example <data_stubbing>`, but now we can test deleting as well.
+Let us reuse the :ref:`previous example <data_stubbing>`, but now we can test deleting as well.
 We modify the ``complex_data_analysis`` to be:
 
 .. code-block:: python

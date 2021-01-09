@@ -15,8 +15,10 @@ extensions = [
     "sphinx_copybutton",
 ]
 html_static_path = ["_static"]
-copybutton_prompt_text = r">>> |\$ "
+copybutton_prompt_text = r">>> |\$ |\.\.\. "
 copybutton_prompt_is_regexp = True
+copybutton_only_copy_prompt_lines = False
+
 html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "github_url": "https://github.com/rajivsarvepalli/mock-alchemy",

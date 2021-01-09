@@ -23,7 +23,7 @@ mock-alchemy documentation
 `Source Repository <https://github.com/rajivsarvepalli/mock-alchemy>`__ |
 `Issues & Ideas <https://github.com/rajivsarvepalli/mock-alchemy/issues>`__
 
-:mod:`mock_alchemy` is an open source, MIT-licensed library providing simple method of mocking SQLAlchemy sessions and gives the ability to do sane asserts.
+:mod:`mock_alchemy` is an open-source, MIT-licensed library providing a simple method of mocking SQLAlchemy sessions and gives the ability to do sane asserts.
 
 .. raw:: html
 
@@ -75,7 +75,7 @@ mock-alchemy documentation
                 <div class="card-body flex-fill">
                     <h5 class="card-title">API reference</h5>
                     <p class="card-text">The reference guide contains a specific description of
-                    the mock-alchemy API.This reference API describes how certain functions work and provides basic examples
+                    the mock-alchemy API. This reference API describes how certain functions work and provides basic examples
                     to illustrate what functions do.</p>
 
 .. container:: custom-button
@@ -92,7 +92,7 @@ mock-alchemy documentation
                 <img src="_static/index_contribute.svg" class="card-img-top" alt="contribute to mock-alchemy action icon" height="72">
                 <div class="card-body flex-fill">
                     <h5 class="card-title">Contributor guide</h5>
-                    <p class="card-text">Interesed in making improvements to this package? The process for suggesting and making changes is described in more detail here along
+                    <p class="card-text">Interesed in making improvements to this library? The process for suggesting and making changes is described in more detail here along
                     with the required development dependencies.</p>
 
 .. container:: custom-button
