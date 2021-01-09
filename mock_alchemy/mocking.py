@@ -550,8 +550,8 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
             for i in to_add:
                 self._mutate_data(i, *args[1:], **_kwargs)
-
-        elif _mock_name == "delete":
+        # delete case
+        else:
             _kwargs = kwargs.copy()
             # pretend like all is being called to get data
             _kwargs["_mock_name"] = "all"

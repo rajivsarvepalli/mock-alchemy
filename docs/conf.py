@@ -3,13 +3,12 @@
 from __future__ import absolute_import, print_function, unicode_literals
 from datetime import datetime
 
-import mock_alchemy
 
 
 project = "mock-alchemy"
 author = "Rajiv Sarvepalli"
 copyright = f"{datetime.now().year}, {author}"
-version = mock_alchemy.__version__
+version = "0.1.0"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
