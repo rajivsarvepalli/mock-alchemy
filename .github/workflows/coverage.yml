@@ -7,7 +7,7 @@ jobs:
       with:
         python-version: '3.7'
         architecture: x64
-  
+
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
