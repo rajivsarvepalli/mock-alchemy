@@ -46,4 +46,3 @@ test-all: clean  ## run all tests with tox
 	tox
 
 check: lint clean test  ## run all necessary steps to check validity of project
-
