@@ -21,6 +21,12 @@ SQLAlchemy mock helpers.
 * Free software: MIT license
 * GitHub: https://github.com/rajivsarvepalli/mock-alchemy
 
+Documentation
+-------------
+
+Full documentation is available at ``http://mock-alchemy.rtfd.io/ <http://mock-alchemy.rtfd.io/>`__.
+This README includes some basic examples.
+
 Credit
 ----------
 
