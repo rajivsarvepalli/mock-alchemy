@@ -7,6 +7,17 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "aspy.yaml"
+version = "1.3.0"
+description = "A few extensions to pyyaml."
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.dependencies]
+pyyaml = "*"
+
+[[package]]
 name = "atomicwrites"
 version = "1.4.0"
 description = "Atomic file writes."
@@ -62,6 +73,17 @@ typing-extensions = ">=3.7.4"
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
 d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
+
+[[package]]
+name = "cfgv"
+version = "2.0.1"
+description = "Validate configuration and produce human readable error messages."
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.dependencies]
+six = "*"
 
 [[package]]
 name = "cfgv"
@@ -242,6 +264,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "futures"
+version = "3.3.0"
+description = "Backport of the concurrent.futures package from Python 3"
+category = "dev"
+optional = false
+python-versions = ">=2.6, <3"
+
+[[package]]
 name = "identify"
 version = "1.5.12"
 description = "File identification library for Python"
@@ -281,6 +311,24 @@ zipp = ">=0.5"
 [package.extras]
 docs = ["sphinx", "rst.linker"]
 testing = ["packaging", "pep517", "unittest2", "importlib-resources (>=1.3)"]
+
+[[package]]
+name = "importlib-resources"
+version = "3.3.1"
+description = "Read resources from Python packages"
+category = "dev"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
+
+[package.dependencies]
+contextlib2 = {version = "*", markers = "python_version < \"3\""}
+pathlib2 = {version = "*", markers = "python_version < \"3\""}
+singledispatch = {version = "*", markers = "python_version < \"3.4\""}
+typing = {version = "*", markers = "python_version < \"3.5\""}
+zipp = {version = ">=0.4", markers = "python_version < \"3.8\""}
+
+[package.extras]
+docs = ["sphinx", "rst.linker", "jaraco.packaging"]
 
 [[package]]
 name = "importlib-resources"
@@ -495,6 +543,27 @@ dev = ["pre-commit", "tox"]
 
 [[package]]
 name = "pre-commit"
+version = "1.18.3"
+description = "A framework for managing and maintaining multi-language pre-commit hooks."
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.dependencies]
+"aspy.yaml" = "*"
+cfgv = ">=2.0.0"
+futures = {version = "*", markers = "python_version < \"3.2\""}
+identify = ">=1.0.0"
+importlib-metadata = "*"
+importlib-resources = {version = "*", markers = "python_version < \"3.7\""}
+nodeenv = ">=0.11.1"
+pyyaml = "*"
+six = "*"
+toml = "*"
+virtualenv = ">=15.2"
+
+[[package]]
+name = "pre-commit"
 version = "2.9.3"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
 category = "dev"
@@ -510,6 +579,19 @@ nodeenv = ">=0.11.1"
 pyyaml = ">=5.1"
 toml = "*"
 virtualenv = ">=20.0.8"
+
+[[package]]
+name = "pre-commit-hooks"
+version = "2.0.0"
+description = "Some out-of-the-box hooks for pre-commit."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+flake8 = "*"
+pyyaml = "*"
+six = "*"
 
 [[package]]
 name = "pre-commit-hooks"
@@ -751,6 +833,17 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "singledispatch"
+version = "3.4.0.3"
+description = "This library brings functools.singledispatch from Python 3.4 to Python 2.6-3.3."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+six = "*"
+
+[[package]]
 name = "six"
 version = "1.15.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -867,6 +960,7 @@ distlib = ">=0.3.1,<1"
 filelock = ">=3.0.0,<4"
 importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 importlib-resources = {version = ">=1.0", markers = "python_version < \"3.7\""}
+pathlib2 = {version = ">=2.3.3,<3", markers = "python_version < \"3.4\" and sys_platform != \"win32\""}
 six = ">=1.9.0,<2"
 
 [package.extras]
@@ -910,12 +1004,16 @@ testing = ["pathlib2", "unittest2", "jaraco.itertools", "func-timeout"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^2.7 || ^3.6.1 ||  ^3.7"
-content-hash = "5c329804e77eb32c9421cee27768564be8aba3e1b1946a94d30b9899b1986dc8"
+content-hash = "1304e0e52c75a6cb0bb8ae3ac0802878785df8a4b5dc90ba077a82ad451216aa"
 
 [metadata.files]
 appdirs = [
     {file = "appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"},
     {file = "appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41"},
+]
+"aspy.yaml" = [
+    {file = "aspy.yaml-1.3.0-py2.py3-none-any.whl", hash = "sha256:463372c043f70160a9ec950c3f1e4c3a82db5fca01d334b6bc89c7164d744bdc"},
+    {file = "aspy.yaml-1.3.0.tar.gz", hash = "sha256:e7c742382eff2caed61f87a39d13f99109088e5e93f04d76eb8d4b28aa143f45"},
 ]
 atomicwrites = [
     {file = "atomicwrites-1.4.0-py2.py3-none-any.whl", hash = "sha256:6d1784dea7c0c8d4a5172b6c620f40b6e4cbfdf96d783691f2e1302a7b88e197"},
@@ -933,6 +1031,8 @@ black = [
     {file = "black-20.8b1.tar.gz", hash = "sha256:1c02557aa099101b9d21496f8a914e9ed2222ef70336404eeeac8edba836fbea"},
 ]
 cfgv = [
+    {file = "cfgv-2.0.1-py2.py3-none-any.whl", hash = "sha256:fbd93c9ab0a523bf7daec408f3be2ed99a980e20b2d19b50fc184ca6b820d289"},
+    {file = "cfgv-2.0.1.tar.gz", hash = "sha256:edb387943b665bf9c434f717bf630fa78aecd53d5900d2e05da6ad6048553144"},
     {file = "cfgv-3.2.0-py2.py3-none-any.whl", hash = "sha256:32e43d604bbe7896fe7c248a9c2276447dbef840feb28fe20494f62af110211d"},
     {file = "cfgv-3.2.0.tar.gz", hash = "sha256:cf22deb93d4bcf92f345a5c3cd39d3d41d6340adc60c78bbbd6588c384fda6a1"},
 ]
@@ -1050,6 +1150,10 @@ functools32 = [
     {file = "functools32-3.2.3-2.tar.gz", hash = "sha256:f6253dfbe0538ad2e387bd8fdfd9293c925d63553f5813c4e587745416501e6d"},
     {file = "functools32-3.2.3-2.zip", hash = "sha256:89d824aa6c358c421a234d7f9ee0bd75933a67c29588ce50aaa3acdf4d403fa0"},
 ]
+futures = [
+    {file = "futures-3.3.0-py2-none-any.whl", hash = "sha256:49b3f5b064b6e3afc3316421a3f25f66c137ae88f068abbf72830170033c5e16"},
+    {file = "futures-3.3.0.tar.gz", hash = "sha256:7e033af76a5e35f58e56da7a91e687706faf4e7bdfb2cbc3f2cca6b9bcda9794"},
+]
 identify = [
     {file = "identify-1.5.12-py2.py3-none-any.whl", hash = "sha256:18994e850ba50c37bcaed4832be8b354d6a06c8fb31f54e0e7ece76d32f69bc8"},
     {file = "identify-1.5.12.tar.gz", hash = "sha256:892473bf12e655884132a3a32aca737a3cbefaa34a850ff52d501773a45837bc"},
@@ -1063,6 +1167,8 @@ importlib-metadata = [
     {file = "importlib_metadata-2.1.1.tar.gz", hash = "sha256:b8de9eff2b35fb037368f28a7df1df4e6436f578fa74423505b6c6a778d5b5dd"},
 ]
 importlib-resources = [
+    {file = "importlib_resources-3.3.1-py2.py3-none-any.whl", hash = "sha256:42068585cc5e8c2bf0a17449817401102a5125cbfbb26bb0f43cde1568f6f2df"},
+    {file = "importlib_resources-3.3.1.tar.gz", hash = "sha256:0ed250dbd291947d1a298e89f39afcc477d5a6624770503034b72588601bcc05"},
     {file = "importlib_resources-4.1.1-py3-none-any.whl", hash = "sha256:0a948d0c8c3f9344de62997e3f73444dbba233b1eaf24352933c2d264b9e4182"},
     {file = "importlib_resources-4.1.1.tar.gz", hash = "sha256:6b45007a479c4ec21165ae3ffbe37faf35404e2041fac6ae1da684f38530ca73"},
 ]
@@ -1129,10 +1235,14 @@ pluggy = [
     {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
 ]
 pre-commit = [
+    {file = "pre_commit-1.18.3-py2.py3-none-any.whl", hash = "sha256:fa78ff96e8e9ac94c748388597693f18b041a181c94a4f039ad20f45287ba44a"},
+    {file = "pre_commit-1.18.3.tar.gz", hash = "sha256:1d3c0587bda7c4e537a46c27f2c84aa006acc18facf9970bf947df596ce91f3f"},
     {file = "pre_commit-2.9.3-py2.py3-none-any.whl", hash = "sha256:6c86d977d00ddc8a60d68eec19f51ef212d9462937acf3ea37c7adec32284ac0"},
     {file = "pre_commit-2.9.3.tar.gz", hash = "sha256:ee784c11953e6d8badb97d19bc46b997a3a9eded849881ec587accd8608d74a4"},
 ]
 pre-commit-hooks = [
+    {file = "pre_commit_hooks-2.0.0-py2.py3-none-any.whl", hash = "sha256:1065eaf211ede746ff491d2040be3b973da226c04b23628c8e9c70bf5eb603b3"},
+    {file = "pre_commit_hooks-2.0.0.tar.gz", hash = "sha256:380915dc21eeb47b9cdc107fb376c04529345fbf62fb146fe5a0553dad5d9262"},
     {file = "pre_commit_hooks-3.4.0-py2.py3-none-any.whl", hash = "sha256:b1d329fc712f53f56af7c4a0ac08c414a7fcfd634dbd829c3a03f39cfb9c3574"},
     {file = "pre_commit_hooks-3.4.0.tar.gz", hash = "sha256:57e377b931aceead550e4a7bdbe8065e79e371e80f593b5b6d1129e63a77154f"},
 ]
@@ -1294,6 +1404,10 @@ scandir = [
     {file = "scandir-1.10.0-cp37-cp37m-win32.whl", hash = "sha256:67f15b6f83e6507fdc6fca22fedf6ef8b334b399ca27c6b568cbfaa82a364173"},
     {file = "scandir-1.10.0-cp37-cp37m-win_amd64.whl", hash = "sha256:b24086f2375c4a094a6b51e78b4cf7ca16c721dcee2eddd7aa6494b42d6d519d"},
     {file = "scandir-1.10.0.tar.gz", hash = "sha256:4d4631f6062e658e9007ab3149a9b914f3548cb38bfb021c64f39a025ce578ae"},
+]
+singledispatch = [
+    {file = "singledispatch-3.4.0.3-py2.py3-none-any.whl", hash = "sha256:833b46966687b3de7f438c761ac475213e53b306740f1abfaa86e1d1aae56aa8"},
+    {file = "singledispatch-3.4.0.3.tar.gz", hash = "sha256:5b06af87df13818d14f08a028e42f566640aef80805c3b50c5056b086e3c2b9c"},
 ]
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
