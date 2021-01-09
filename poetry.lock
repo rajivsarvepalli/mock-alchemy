@@ -29,6 +29,18 @@ tests = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)"
 tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six"]
 
 [[package]]
+name = "backports.functools-lru-cache"
+version = "1.6.1"
+description = "Backport of functools.lru_cache"
+category = "dev"
+optional = false
+python-versions = ">=2.6"
+
+[package.extras]
+docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
+testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pytest-black-multipy", "pytest-cov"]
+
+[[package]]
 name = "black"
 version = "20.8b1"
 description = "The uncompromising code formatter."
@@ -87,6 +99,26 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
+name = "configparser"
+version = "4.0.2"
+description = "Updated configparser from Python 3.7 for Python 2.6+."
+category = "dev"
+optional = false
+python-versions = ">=2.6"
+
+[package.extras]
+docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
+testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2)", "pytest-flake8", "pytest-black-multipy"]
+
+[[package]]
+name = "contextlib2"
+version = "0.6.0.post1"
+description = "Backports and enhancements for the contextlib module"
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
 name = "coverage"
 version = "5.3.1"
 description = "Code coverage measurement for Python"
@@ -117,12 +149,28 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "docopt"
+version = "0.6.2"
+description = "Pythonic argument parser, that will make you smile"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "docutils"
 version = "0.16"
 description = "Docutils -- Python Documentation Utilities"
 category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+
+[[package]]
+name = "enum34"
+version = "1.1.10"
+description = "Python 3.4 Enum backported to 3.3, 3.2, 3.1, 2.7, 2.6, 2.5, and 2.4"
+category = "dev"
+optional = false
+python-versions = "*"
 
 [[package]]
 name = "fancycompleter"
@@ -153,10 +201,14 @@ optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
 
 [package.dependencies]
+configparser = {version = "*", markers = "python_version < \"3.2\""}
+enum34 = {version = "*", markers = "python_version < \"3.4\""}
+functools32 = {version = "*", markers = "python_version < \"3.2\""}
 importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 mccabe = ">=0.6.0,<0.7.0"
 pycodestyle = ">=2.6.0a1,<2.7.0"
 pyflakes = ">=2.2.0,<2.3.0"
+typing = {version = "*", markers = "python_version < \"3.5\""}
 
 [[package]]
 name = "flake8-bugbear"
@@ -172,6 +224,22 @@ flake8 = ">=3.0.0"
 
 [package.extras]
 dev = ["coverage", "black", "hypothesis", "hypothesmith"]
+
+[[package]]
+name = "funcsigs"
+version = "1.0.2"
+description = "Python function signatures from PEP362 for Python 2.6, 2.7 and 3.2+"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "functools32"
+version = "3.2.3-2"
+description = "Backport of the functools module from Python 3.2.3 for use on 2.7 and PyPy."
+category = "dev"
+optional = false
+python-versions = "*"
 
 [[package]]
 name = "identify"
@@ -198,19 +266,21 @@ six = ">=1.9"
 
 [[package]]
 name = "importlib-metadata"
-version = "3.3.0"
+version = "2.1.1"
 description = "Read metadata from Python packages"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 
 [package.dependencies]
-typing-extensions = {version = ">=3.6.4", markers = "python_version < \"3.8\""}
+configparser = {version = ">=3.5", markers = "python_version < \"3\""}
+contextlib2 = {version = "*", markers = "python_version < \"3\""}
+pathlib2 = {version = "*", markers = "python_version < \"3\""}
 zipp = ">=0.5"
 
 [package.extras]
-docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
-testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pytest-cov", "jaraco.test (>=3.2.0)", "packaging", "pep517", "pyfakefs", "flufl.flake8", "pytest-black (>=0.3.7)", "pytest-mypy", "importlib-resources (>=1.3)"]
+docs = ["sphinx", "rst.linker"]
+testing = ["packaging", "pep517", "unittest2", "importlib-resources (>=1.3)"]
 
 [[package]]
 name = "importlib-resources"
@@ -237,6 +307,21 @@ python-versions = "*"
 
 [[package]]
 name = "jedi"
+version = "0.17.2"
+description = "An autocompletion tool for Python that can be used for text editors."
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+
+[package.dependencies]
+parso = ">=0.7.0,<0.8.0"
+
+[package.extras]
+qa = ["flake8 (==3.7.9)"]
+testing = ["Django (<3.1)", "colorama", "docopt", "pytest (>=3.9.0,<5.0.0)"]
+
+[[package]]
+name = "jedi"
 version = "0.18.0"
 description = "An autocompletion tool for Python that can be used for text editors."
 category = "dev"
@@ -260,6 +345,23 @@ python-versions = "*"
 
 [[package]]
 name = "mock"
+version = "3.0.5"
+description = "Rolling backport of unittest.mock for all Pythons"
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.dependencies]
+funcsigs = {version = ">=1", markers = "python_version < \"3.3\""}
+six = "*"
+
+[package.extras]
+build = ["twine", "wheel", "blurb"]
+docs = ["sphinx"]
+test = ["pytest", "pytest-cov"]
+
+[[package]]
+name = "mock"
 version = "4.0.3"
 description = "Rolling backport of unittest.mock for all Pythons"
 category = "dev"
@@ -270,6 +372,17 @@ python-versions = ">=3.6"
 build = ["twine", "wheel", "blurb"]
 docs = ["sphinx"]
 test = ["pytest (<5.4)", "pytest-cov"]
+
+[[package]]
+name = "more-itertools"
+version = "5.0.0"
+description = "More routines for operating on iterables, beyond itertools"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+six = ">=1.0.0,<2.0.0"
 
 [[package]]
 name = "mypy-extensions"
@@ -300,6 +413,17 @@ pyparsing = ">=2.0.2"
 
 [[package]]
 name = "parso"
+version = "0.7.1"
+description = "A Python Parser"
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.extras]
+testing = ["docopt", "pytest (>=3.0.7)"]
+
+[[package]]
+name = "parso"
 version = "0.8.1"
 description = "A Python Parser"
 category = "dev"
@@ -319,6 +443,7 @@ optional = false
 python-versions = "*"
 
 [package.dependencies]
+scandir = {version = "*", markers = "python_version < \"3.5\""}
 six = "*"
 
 [[package]]
@@ -392,6 +517,18 @@ toml = "*"
 
 [[package]]
 name = "prompt-toolkit"
+version = "2.0.10"
+description = "Library for building powerful interactive command lines in Python"
+category = "dev"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+
+[package.dependencies]
+six = ">=1.9.0"
+wcwidth = "*"
+
+[[package]]
+name = "prompt-toolkit"
 version = "3.0.10"
 description = "Library for building powerful interactive command lines in Python"
 category = "dev"
@@ -400,6 +537,23 @@ python-versions = ">=3.6.1"
 
 [package.dependencies]
 wcwidth = "*"
+
+[[package]]
+name = "ptpython"
+version = "2.0.6"
+description = "Python REPL build on top of prompt_toolkit"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+docopt = "*"
+jedi = ">=0.9.0"
+prompt-toolkit = ">=2.0.8,<2.1.0"
+pygments = "*"
+
+[package.extras]
+ptipython = ["ipython"]
 
 [[package]]
 name = "ptpython"
@@ -446,11 +600,11 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "pygments"
-version = "2.7.3"
+version = "2.5.2"
 description = "Pygments is a syntax highlighting package written in Python."
 category = "dev"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "pyparsing"
@@ -475,6 +629,34 @@ description = "A library for building flexible command line interfaces"
 category = "dev"
 optional = false
 python-versions = "*"
+
+[[package]]
+name = "pytest"
+version = "4.6.11"
+description = "pytest: simple powerful testing with Python"
+category = "dev"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
+
+[package.dependencies]
+atomicwrites = ">=1.0"
+attrs = ">=17.4.0"
+colorama = {version = "*", markers = "sys_platform == \"win32\" and python_version != \"3.4\""}
+funcsigs = {version = ">=1.0", markers = "python_version < \"3.0\""}
+importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
+more-itertools = [
+    {version = ">=4.0.0,<6.0.0", markers = "python_version <= \"2.7\""},
+    {version = ">=4.0.0", markers = "python_version > \"2.7\""},
+]
+packaging = "*"
+pathlib2 = {version = ">=2.2.0", markers = "python_version < \"3.6\""}
+pluggy = ">=0.12,<1.0"
+py = ">=1.5.0"
+six = ">=1.10.0"
+wcwidth = "*"
+
+[package.extras]
+testing = ["argcomplete", "hypothesis (>=3.56)", "nose", "requests", "mock"]
 
 [[package]]
 name = "pytest"
@@ -553,6 +735,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "scandir"
+version = "1.10.0"
+description = "scandir, a better directory iterator and faster os.walk()"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "six"
 version = "1.15.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -620,6 +810,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "typing"
+version = "3.7.4.3"
+description = "Type Hints for Python"
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
 name = "typing-extensions"
 version = "3.7.4.3"
 description = "Backported and Experimental Type Hints for Python 3.5+"
@@ -655,6 +853,9 @@ category = "dev"
 optional = false
 python-versions = "*"
 
+[package.dependencies]
+"backports.functools-lru-cache" = {version = ">=1.2.1", markers = "python_version < \"3.2\""}
+
 [[package]]
 name = "wmctrl"
 version = "0.3"
@@ -665,20 +866,23 @@ python-versions = "*"
 
 [[package]]
 name = "zipp"
-version = "3.4.0"
+version = "1.2.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=2.7"
+
+[package.dependencies]
+contextlib2 = {version = "*", markers = "python_version < \"3.4\""}
 
 [package.extras]
 docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
-testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pytest-cov", "jaraco.test (>=3.2.0)", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy"]
+testing = ["pathlib2", "unittest2", "jaraco.itertools", "func-timeout"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = ">=2.7, >=3.6.1 <4"
-content-hash = "0c880e8ab3df04ce0b18f7704dd65363929a1941a90dd37c86ecbb0dc1bd7f0b"
+python-versions = "^2.7 || ^3.6.1 ||  ^3.7"
+content-hash = "45d35292b254e620f7909c79e0df2035db6b546b84519907e804a61e1185b321"
 
 [metadata.files]
 appdirs = [
@@ -692,6 +896,10 @@ atomicwrites = [
 attrs = [
     {file = "attrs-20.3.0-py2.py3-none-any.whl", hash = "sha256:31b2eced602aa8423c2aea9c76a724617ed67cf9513173fd3a4f03e3a929c7e6"},
     {file = "attrs-20.3.0.tar.gz", hash = "sha256:832aa3cde19744e49938b91fea06d69ecb9e649c93ba974535d08ad92164f700"},
+]
+"backports.functools-lru-cache" = [
+    {file = "backports.functools_lru_cache-1.6.1-py2.py3-none-any.whl", hash = "sha256:0bada4c2f8a43d533e4ecb7a12214d9420e66eb206d54bf2d682581ca4b80848"},
+    {file = "backports.functools_lru_cache-1.6.1.tar.gz", hash = "sha256:8fde5f188da2d593bd5bc0be98d9abc46c95bb8a9dde93429570192ee6cc2d4a"},
 ]
 black = [
     {file = "black-20.8b1.tar.gz", hash = "sha256:1c02557aa099101b9d21496f8a914e9ed2222ef70336404eeeac8edba836fbea"},
@@ -710,6 +918,14 @@ click = [
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
     {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
+]
+configparser = [
+    {file = "configparser-4.0.2-py2.py3-none-any.whl", hash = "sha256:254c1d9c79f60c45dfde850850883d5aaa7f19a23f13561243a050d5a7c3fe4c"},
+    {file = "configparser-4.0.2.tar.gz", hash = "sha256:c7d282687a5308319bf3d2e7706e575c635b0a470342641c93bea0ea3b5331df"},
+]
+contextlib2 = [
+    {file = "contextlib2-0.6.0.post1-py2.py3-none-any.whl", hash = "sha256:3355078a159fbb44ee60ea80abd0d87b80b78c248643b49aa6d94673b413609b"},
+    {file = "contextlib2-0.6.0.post1.tar.gz", hash = "sha256:01f490098c18b19d2bd5bb5dc445b2054d2fa97f09a4280ba2c5f3c394c8162e"},
 ]
 coverage = [
     {file = "coverage-5.3.1-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:fabeeb121735d47d8eab8671b6b031ce08514c86b7ad8f7d5490a7b6dcd6267d"},
@@ -770,9 +986,17 @@ distlib = [
     {file = "distlib-0.3.1-py2.py3-none-any.whl", hash = "sha256:8c09de2c67b3e7deef7184574fc060ab8a793e7adbb183d942c389c8b13c52fb"},
     {file = "distlib-0.3.1.zip", hash = "sha256:edf6116872c863e1aa9d5bb7cb5e05a022c519a4594dc703843343a9ddd9bff1"},
 ]
+docopt = [
+    {file = "docopt-0.6.2.tar.gz", hash = "sha256:49b3a825280bd66b3aa83585ef59c4a8c82f2c8a522dbe754a8bc8d08c85c491"},
+]
 docutils = [
     {file = "docutils-0.16-py2.py3-none-any.whl", hash = "sha256:0c5b78adfbf7762415433f5515cd5c9e762339e23369dbe8000d84a4bf4ab3af"},
     {file = "docutils-0.16.tar.gz", hash = "sha256:c2de3a60e9e7d07be26b7f2b00ca0309c207e06c100f9cc2a94931fc75a478fc"},
+]
+enum34 = [
+    {file = "enum34-1.1.10-py2-none-any.whl", hash = "sha256:a98a201d6de3f2ab3db284e70a33b0f896fbf35f8086594e8c9e74b909058d53"},
+    {file = "enum34-1.1.10-py3-none-any.whl", hash = "sha256:c3858660960c984d6ab0ebad691265180da2b43f07e061c0f8dca9ef3cffd328"},
+    {file = "enum34-1.1.10.tar.gz", hash = "sha256:cce6a7477ed816bd2542d03d53db9f0db935dd013b70f336a95c73979289f248"},
 ]
 fancycompleter = [
     {file = "fancycompleter-0.9.1-py3-none-any.whl", hash = "sha256:dd076bca7d9d524cc7f25ec8f35ef95388ffef9ef46def4d3d25e9b044ad7080"},
@@ -790,6 +1014,14 @@ flake8-bugbear = [
     {file = "flake8-bugbear-20.11.1.tar.gz", hash = "sha256:528020129fea2dea33a466b9d64ab650aa3e5f9ffc788b70ea4bc6cf18283538"},
     {file = "flake8_bugbear-20.11.1-py36.py37.py38-none-any.whl", hash = "sha256:f35b8135ece7a014bc0aee5b5d485334ac30a6da48494998cc1fabf7ec70d703"},
 ]
+funcsigs = [
+    {file = "funcsigs-1.0.2-py2.py3-none-any.whl", hash = "sha256:330cc27ccbf7f1e992e69fef78261dc7c6569012cf397db8d3de0234e6c937ca"},
+    {file = "funcsigs-1.0.2.tar.gz", hash = "sha256:a7bb0f2cf3a3fd1ab2732cb49eba4252c2af4240442415b4abce3b87022a8f50"},
+]
+functools32 = [
+    {file = "functools32-3.2.3-2.tar.gz", hash = "sha256:f6253dfbe0538ad2e387bd8fdfd9293c925d63553f5813c4e587745416501e6d"},
+    {file = "functools32-3.2.3-2.zip", hash = "sha256:89d824aa6c358c421a234d7f9ee0bd75933a67c29588ce50aaa3acdf4d403fa0"},
+]
 identify = [
     {file = "identify-1.5.11-py2.py3-none-any.whl", hash = "sha256:7aef7a5104d6254c162990e54a203cdc0fd202046b6c415bd5d636472f6565c4"},
     {file = "identify-1.5.11.tar.gz", hash = "sha256:b2c71bf9f5c482c389cef816f3a15f1c9d7429ad70f497d4a2e522442d80c6de"},
@@ -799,8 +1031,8 @@ importanize = [
     {file = "importanize-0.7.0.tar.gz", hash = "sha256:1bd383aa79d594e3c4cab8722046fe6bd6baf887950531f035ae6152489876f5"},
 ]
 importlib-metadata = [
-    {file = "importlib_metadata-3.3.0-py3-none-any.whl", hash = "sha256:bf792d480abbd5eda85794e4afb09dd538393f7d6e6ffef6e9f03d2014cf9450"},
-    {file = "importlib_metadata-3.3.0.tar.gz", hash = "sha256:5c5a2720817414a6c41f0a49993908068243ae02c1635a228126519b509c8aed"},
+    {file = "importlib_metadata-2.1.1-py2.py3-none-any.whl", hash = "sha256:c2d6341ff566f609e89a2acb2db190e5e1d23d5409d6cc8d2fe34d72443876d4"},
+    {file = "importlib_metadata-2.1.1.tar.gz", hash = "sha256:b8de9eff2b35fb037368f28a7df1df4e6436f578fa74423505b6c6a778d5b5dd"},
 ]
 importlib-resources = [
     {file = "importlib_resources-4.1.1-py3-none-any.whl", hash = "sha256:0a948d0c8c3f9344de62997e3f73444dbba233b1eaf24352933c2d264b9e4182"},
@@ -811,6 +1043,8 @@ iniconfig = [
     {file = "iniconfig-1.1.1.tar.gz", hash = "sha256:bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32"},
 ]
 jedi = [
+    {file = "jedi-0.17.2-py2.py3-none-any.whl", hash = "sha256:98cc583fa0f2f8304968199b01b6b4b94f469a1f4a74c1560506ca2a211378b5"},
+    {file = "jedi-0.17.2.tar.gz", hash = "sha256:86ed7d9b750603e4ba582ea8edc678657fb4007894a12bcf6f4bb97892f31d20"},
     {file = "jedi-0.18.0-py2.py3-none-any.whl", hash = "sha256:18456d83f65f400ab0c2d3319e48520420ef43b23a086fdc05dff34132f0fb93"},
     {file = "jedi-0.18.0.tar.gz", hash = "sha256:92550a404bad8afed881a137ec9a461fed49eca661414be45059329614ed0707"},
 ]
@@ -819,8 +1053,15 @@ mccabe = [
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
 ]
 mock = [
+    {file = "mock-3.0.5-py2.py3-none-any.whl", hash = "sha256:d157e52d4e5b938c550f39eb2fd15610db062441a9c2747d3dbfa9298211d0f8"},
+    {file = "mock-3.0.5.tar.gz", hash = "sha256:83657d894c90d5681d62155c82bda9c1187827525880eda8ff5df4ec813437c3"},
     {file = "mock-4.0.3-py3-none-any.whl", hash = "sha256:122fcb64ee37cfad5b3f48d7a7d51875d7031aaf3d8be7c42e2bee25044eee62"},
     {file = "mock-4.0.3.tar.gz", hash = "sha256:7d3fbbde18228f4ff2f1f119a45cdffa458b4c0dee32eb4d2bb2f82554bac7bc"},
+]
+more-itertools = [
+    {file = "more-itertools-5.0.0.tar.gz", hash = "sha256:38a936c0a6d98a38bcc2d03fdaaedaba9f412879461dd2ceff8d37564d6522e4"},
+    {file = "more_itertools-5.0.0-py2-none-any.whl", hash = "sha256:c0a5785b1109a6bd7fac76d6837fd1feca158e54e521ccd2ae8bfe393cc9d4fc"},
+    {file = "more_itertools-5.0.0-py3-none-any.whl", hash = "sha256:fe7a7cae1ccb57d33952113ff4fa1bc5f879963600ed74918f1236e212ee50b9"},
 ]
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
@@ -835,6 +1076,8 @@ packaging = [
     {file = "packaging-20.8.tar.gz", hash = "sha256:78598185a7008a470d64526a8059de9aaa449238f280fc9eb6b13ba6c4109093"},
 ]
 parso = [
+    {file = "parso-0.7.1-py2.py3-none-any.whl", hash = "sha256:97218d9159b2520ff45eb78028ba8b50d2bc61dcc062a9682666f2dc4bd331ea"},
+    {file = "parso-0.7.1.tar.gz", hash = "sha256:caba44724b994a8a5e086460bb212abc5a8bc46951bf4a9a1210745953622eb9"},
     {file = "parso-0.8.1-py2.py3-none-any.whl", hash = "sha256:15b00182f472319383252c18d5913b69269590616c947747bc50bf4ac768f410"},
     {file = "parso-0.8.1.tar.gz", hash = "sha256:8519430ad07087d4c997fda3a7918f7cfa27cb58972a8c89c2a0295a1c940e9e"},
 ]
@@ -862,10 +1105,15 @@ pre-commit-hooks = [
     {file = "pre_commit_hooks-3.4.0.tar.gz", hash = "sha256:57e377b931aceead550e4a7bdbe8065e79e371e80f593b5b6d1129e63a77154f"},
 ]
 prompt-toolkit = [
+    {file = "prompt_toolkit-2.0.10-py2-none-any.whl", hash = "sha256:e7f8af9e3d70f514373bf41aa51bc33af12a6db3f71461ea47fea985defb2c31"},
+    {file = "prompt_toolkit-2.0.10-py3-none-any.whl", hash = "sha256:46642344ce457641f28fc9d1c9ca939b63dadf8df128b86f1b9860e59c73a5e4"},
+    {file = "prompt_toolkit-2.0.10.tar.gz", hash = "sha256:f15af68f66e664eaa559d4ac8a928111eebd5feda0c11738b5998045224829db"},
     {file = "prompt_toolkit-3.0.10-py3-none-any.whl", hash = "sha256:ac329c69bd8564cb491940511957312c7b8959bb5b3cf3582b406068a51d5bb7"},
     {file = "prompt_toolkit-3.0.10.tar.gz", hash = "sha256:b8b3d0bde65da350290c46a8f54f336b3cbf5464a4ac11239668d986852e79d5"},
 ]
 ptpython = [
+    {file = "ptpython-2.0.6-py2.py3-none-any.whl", hash = "sha256:0977f56c934789d9955839ef71268148858f826fda49b267cb377ac7501a897b"},
+    {file = "ptpython-2.0.6.tar.gz", hash = "sha256:90e24040e82de4abae0bbe6e352d59ae6657e14e1154e742c0038679361b052f"},
     {file = "ptpython-3.0.9-py2.py3-none-any.whl", hash = "sha256:f9278039d8b3aeed285a220e347c5053e15b95b7ebffcc2686d66ea024422cab"},
     {file = "ptpython-3.0.9.tar.gz", hash = "sha256:e9933a9d00c3571cbd824881ba0ff1e6e23706fd466d038b9230d845184f514b"},
 ]
@@ -882,8 +1130,8 @@ pyflakes = [
     {file = "pyflakes-2.2.0.tar.gz", hash = "sha256:35b2d75ee967ea93b55750aa9edbbf72813e06a66ba54438df2cfac9e3c27fc8"},
 ]
 pygments = [
-    {file = "Pygments-2.7.3-py3-none-any.whl", hash = "sha256:f275b6c0909e5dafd2d6269a656aa90fa58ebf4a74f8fcf9053195d226b24a08"},
-    {file = "Pygments-2.7.3.tar.gz", hash = "sha256:ccf3acacf3782cbed4a989426012f1c535c9a90d3a7fc3f16d231b9372d2b716"},
+    {file = "Pygments-2.5.2-py2.py3-none-any.whl", hash = "sha256:2a3fe295e54a20164a9df49c75fa58526d3be48e14aceba6d6b1e8ac0bfd6f1b"},
+    {file = "Pygments-2.5.2.tar.gz", hash = "sha256:98c8aa5a9f778fcd1026a17361ddaf7330d1b7c62ae97c3bb0ae73e0b9b6b0fe"},
 ]
 pyparsing = [
     {file = "pyparsing-2.4.7-py2.py3-none-any.whl", hash = "sha256:ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b"},
@@ -898,6 +1146,8 @@ pyrepl = [
     {file = "pyrepl-0.9.0.tar.gz", hash = "sha256:292570f34b5502e871bbb966d639474f2b57fbfcd3373c2d6a2f3d56e681a775"},
 ]
 pytest = [
+    {file = "pytest-4.6.11-py2.py3-none-any.whl", hash = "sha256:a00a7d79cbbdfa9d21e7d0298392a8dd4123316bfac545075e6f8f24c94d8c97"},
+    {file = "pytest-4.6.11.tar.gz", hash = "sha256:50fa82392f2120cc3ec2ca0a75ee615be4c479e66669789771f1758332be4353"},
     {file = "pytest-6.2.1-py3-none-any.whl", hash = "sha256:1969f797a1a0dbd8ccf0fecc80262312729afea9c17f1d70ebf85c5e76c6f7c8"},
     {file = "pytest-6.2.1.tar.gz", hash = "sha256:66e419b1899bc27346cb2c993e12c5e5e8daba9073c1fbce33b9807abc95c306"},
 ]
@@ -1000,6 +1250,19 @@ regex = [
     {file = "ruamel.yaml.clib-0.2.2-cp39-cp39-win_amd64.whl", hash = "sha256:6c0a5dc52fc74eb87c67374a4e554d4761fd42a4d01390b7e868b30d21f4b8bb"},
     {file = "ruamel.yaml.clib-0.2.2.tar.gz", hash = "sha256:2d24bd98af676f4990c4d715bcdc2a60b19c56a3fb3a763164d2d8ca0e806ba7"},
 ]
+scandir = [
+    {file = "scandir-1.10.0-cp27-cp27m-win32.whl", hash = "sha256:92c85ac42f41ffdc35b6da57ed991575bdbe69db895507af88b9f499b701c188"},
+    {file = "scandir-1.10.0-cp27-cp27m-win_amd64.whl", hash = "sha256:cb925555f43060a1745d0a321cca94bcea927c50114b623d73179189a4e100ac"},
+    {file = "scandir-1.10.0-cp34-cp34m-win32.whl", hash = "sha256:2c712840c2e2ee8dfaf36034080108d30060d759c7b73a01a52251cc8989f11f"},
+    {file = "scandir-1.10.0-cp34-cp34m-win_amd64.whl", hash = "sha256:2586c94e907d99617887daed6c1d102b5ca28f1085f90446554abf1faf73123e"},
+    {file = "scandir-1.10.0-cp35-cp35m-win32.whl", hash = "sha256:2b8e3888b11abb2217a32af0766bc06b65cc4a928d8727828ee68af5a967fa6f"},
+    {file = "scandir-1.10.0-cp35-cp35m-win_amd64.whl", hash = "sha256:8c5922863e44ffc00c5c693190648daa6d15e7c1207ed02d6f46a8dcc2869d32"},
+    {file = "scandir-1.10.0-cp36-cp36m-win32.whl", hash = "sha256:2ae41f43797ca0c11591c0c35f2f5875fa99f8797cb1a1fd440497ec0ae4b022"},
+    {file = "scandir-1.10.0-cp36-cp36m-win_amd64.whl", hash = "sha256:7d2d7a06a252764061a020407b997dd036f7bd6a175a5ba2b345f0a357f0b3f4"},
+    {file = "scandir-1.10.0-cp37-cp37m-win32.whl", hash = "sha256:67f15b6f83e6507fdc6fca22fedf6ef8b334b399ca27c6b568cbfaa82a364173"},
+    {file = "scandir-1.10.0-cp37-cp37m-win_amd64.whl", hash = "sha256:b24086f2375c4a094a6b51e78b4cf7ca16c721dcee2eddd7aa6494b42d6d519d"},
+    {file = "scandir-1.10.0.tar.gz", hash = "sha256:4d4631f6062e658e9007ab3149a9b914f3548cb38bfb021c64f39a025ce578ae"},
+]
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
     {file = "six-1.15.0.tar.gz", hash = "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"},
@@ -1084,6 +1347,10 @@ typed-ast = [
     {file = "typed_ast-1.4.2-cp39-cp39-win_amd64.whl", hash = "sha256:7147e2a76c75f0f64c4319886e7639e490fee87c9d25cb1d4faef1d8cf83a440"},
     {file = "typed_ast-1.4.2.tar.gz", hash = "sha256:9fc0b3cb5d1720e7141d103cf4819aea239f7d136acf9ee4a69b047b7986175a"},
 ]
+typing = [
+    {file = "typing-3.7.4.3-py2-none-any.whl", hash = "sha256:283d868f5071ab9ad873e5e52268d611e851c870a2ba354193026f2dfb29d8b5"},
+    {file = "typing-3.7.4.3.tar.gz", hash = "sha256:1187fb9c82fd670d10aa07bbb6cfcfe4bdda42d6fab8d5134f04e8c4d0b71cc9"},
+]
 typing-extensions = [
     {file = "typing_extensions-3.7.4.3-py2-none-any.whl", hash = "sha256:dafc7639cde7f1b6e1acc0f457842a83e722ccca8eef5270af2d74792619a89f"},
     {file = "typing_extensions-3.7.4.3-py3-none-any.whl", hash = "sha256:7cb407020f00f7bfc3cb3e7881628838e69d8f3fcab2f64742a5e76b2f841918"},
@@ -1101,6 +1368,6 @@ wmctrl = [
     {file = "wmctrl-0.3.tar.gz", hash = "sha256:d806f65ac1554366b6e31d29d7be2e8893996c0acbb2824bbf2b1f49cf628a13"},
 ]
 zipp = [
-    {file = "zipp-3.4.0-py3-none-any.whl", hash = "sha256:102c24ef8f171fd729d46599845e95c7ab894a4cf45f5de11a44cc7444fb1108"},
-    {file = "zipp-3.4.0.tar.gz", hash = "sha256:ed5eee1974372595f9e416cc7bbeeb12335201d8081ca8a0743c954d4446e5cb"},
+    {file = "zipp-1.2.0-py2.py3-none-any.whl", hash = "sha256:e0d9e63797e483a30d27e09fffd308c59a700d365ec34e93cc100844168bf921"},
+    {file = "zipp-1.2.0.tar.gz", hash = "sha256:c70410551488251b0fee67b460fb9a536af8d6f9f008ad10ac51f615b6a521b1"},
 ]
