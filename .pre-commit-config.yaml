@@ -35,10 +35,6 @@ repos:
         args: [--line-length=80, --safe]
         language_version: python3
 
-  - repo: https://github.com/mgedmin/check-manifest
-    rev: 'master'
-    hooks:
-      - id: check-manifest
 
   -   repo: https://gitlab.com/pycqa/flake8
       rev: 3.7.3
