@@ -1,8 +1,8 @@
 ===============
 Mock SQLAlchemy
 ===============
-.. image:: https://readthedocs.org/projects/mockalchemy/badge/?version=latest
-    :target: https://mockalchemy.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/mock-alchemy/badge/?version=latest
+    :target: https://mock-alchemy.readthedocs.io/en/latest/?badge=latest
 
 .. image:: https://img.shields.io/pypi/v/mock-alchemy.svg
     :target: https://pypi.org/project/mock-alchemy/
