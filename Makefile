@@ -35,7 +35,6 @@ lint: clean  ## lint whole library
 	then \
 		pre-commit run --all-files ; \
 	fi
-	python setup.py checkdocs
 
 test: clean  ## run all tests
 	pytest --doctest-modules --cov=mock_alchemy/ --cov-report=term-missing mock_alchemy/
@@ -48,9 +47,3 @@ test-all: clean  ## run all tests with tox
 
 check: lint clean test  ## run all necessary steps to check validity of project
 
-release: clean  ## push release to pypi
-	python setup.py sdist bdist_wheel upload
-
-dist: clean  ## create distribution of the library
-	python setup.py sdist bdist_wheel
-	ls -l dist
