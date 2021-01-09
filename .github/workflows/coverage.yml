@@ -2,12 +2,13 @@ name: Coverage
 on: push
 jobs:
   coverage:
-    runs-on: ubuntu-latest      
-    steps:
-      with:
-        python-version: '3.7'
-        architecture: x64
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        python-version: [3.8]
 
+    steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
