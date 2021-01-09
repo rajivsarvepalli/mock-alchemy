@@ -37,10 +37,10 @@ lint: clean  ## lint whole library
 	fi
 
 test: clean  ## run all tests
-	pytest --doctest-modules --cov=mock_alchemy/ --cov-report=term-missing mock_alchemy/
+	poetry run pytest --doctest-modules --cov=mock_alchemy/ --cov-report=term-missing mock_alchemy/
 
 test-pdb: clean  ## run all tests with pdb
-	pytest --doctest-modules --cov=mock_alchemy/ --cov-report=term-missing --pdb --capture=no mock_alchemy/
+	poetry run pytest --doctest-modules --cov=mock_alchemy/ --cov-report=term-missing --pdb --capture=no mock_alchemy/
 
 test-all: clean  ## run all tests with tox
 	tox

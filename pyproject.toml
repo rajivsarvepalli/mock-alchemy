@@ -32,7 +32,7 @@ flake8-bugbear = { version = "^20.0", python = "^3.6" }
 "collective.checkdocs" = "^0.2"
 importanize = "^0.7.0"
 mock = [
-    {version = "^3.0", python = "^2.7"},
+    {version = "^1.0.1", python = "^2.7"},
     { version = "^4.0.3", python = "^3.6" }
 ]
 pdbpp = "^0.10.2"

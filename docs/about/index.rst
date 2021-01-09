@@ -17,8 +17,8 @@ Why?
 
 SQLAlchemy is awesome. Unittests are great.
 Accessing DB during tests - not so much.
-This library provides easy way to mock SQLAlchemy's session
-in unittests while preserving ability to do sane asserts.
+This library provides an easy way to mock SQLAlchemy's session
+in unittests while preserving the ability to do sane asserts.
 Normally SQLAlchemy's expressions cannot be easily compared
 as comparison on binary expression produces yet another binary expression::
 

@@ -3,7 +3,7 @@
 User Guide
 ==========
 
-There several major uses for this package and here I will try to detail out several examples.
+There several major uses for this package and I will try to detail out several examples in this guide.
 
 Quick Examples
 --------------
@@ -34,7 +34,7 @@ UnifiedAlchemyMagicMock
 Asserts
 ~~~~~~~
 
-In real world though session can be interacted with multiple times to query some data.
+In the real-world, a SqlAlchemy session can be interacted with multiple times to query some data.
 In those cases ``UnifiedAlchemyMagicMock`` can be used which combines various calls for easier assertions::
 
     >>> from mock_alchemy.mocking import UnifiedAlchemyMagicMock
@@ -164,13 +164,279 @@ object is present, this library considers them separate objects. For example::
 
 The item referred to by :code:`c == 'three'` is still present in the filtered query despite the individual item being deleted.
 
-Real-World Example
-------------------
+More examples are available inside the documentation for :class:`mock_alchemy.mocking.UnifiedAlchemyMagicMock`, or generally
+inside :mod:`mock_alchemy.mocking`.
 
-There are several examples.
+Real-World Examples
+-------------------
 
-Another Real-World Example
---------------------------
+In these real-world examples, I will explain hypothetical or real scenarios in which I have used this library to mock SqlAlchemy in
+order to efficiently test my code. I will also explain several alternatives to this library to use for testing, and why specifically this
+library may be useful in the specific scenario.
 
-Final Real-World Example
---------------------------
+.. _data_stubbing:
+
+Data Stubbing
+^^^^^^^^^^^^^
+
+My main use case for this library came into play when using a codebase that had entry points (runnable scripts) that required session objects.
+These scripts use the session objects to integrate a combination of SQL tables to perform data analysis or other techniques in some manner.
+While each individual data analysis techniques were tested separately through unit tests, I wanted to test the integration of these components.
+One solution is to use transactions so that your database is never modified. However, this method requires access to the real SQL server and also
+is unlikely to provide stable and consistent data. Tests should be rerunnable with the same output every time and consistent. Another solution would be to
+set up a test database. However, this is very time consuming both in set up and tests take quite long to run. Additionally, some local machines
+struggle to set up a SQL server locally, so it is not the best solution. Finally, I ran into the original version of this library created by
+`Miroslav Shubernetskiy <https://github.com/miki725>`__. I found this library to combine the abilities I needed in order to test scripts that required
+a session object as a parameter. By creating a mocked-up session, I was able to effectively test my functions that combined many different SQL tables
+together for data analysis. Since there were some additional features I desired to add, I created my own version of the library to use in my own projects.
+
+Now, let us take a look at some example code for this scenario.
+First, let us consider the function we want to test. Please note the code below was created to support the scenario above and therefore is not runnable,
+but merely exemplary to what this library can perform.
+
+.. code-block:: python
+
+    from sqlalchemy import Column, Integer, String
+    from sqlalchemy.ext.declarative import declarative_base
+    Base = declarative_base()
+
+    # assume similar classes for Data2 and Data3
+    class Data1(Base):
+        __tablename__ = 'some_table'
+        pk1 = Column(Integer, primary_key=True)
+        data_val1 = Column(Integer)
+        data_val2 = Column(Integer)
+        data_val3 = Column(Integer)
+        def __init__(self, pk1, val1, val2, val3):
+            self.pk1 = pk1
+            self.data_val1 = val1
+            self.data_val2 = val2
+            self.data_val3 = val3
+
+    class CombinedAnalysis(Base):
+        __tablename__ = 'some_table'
+        pk1 = Column(Integer, primary_key=True)
+        analysis_val1 = Column(Integer)
+        analysis_val2 = Column(Integer)
+        analysis_val3 = Column(Integer)
+        def __init__(self, pk1, val1, val2, val3):
+            self.pk1 = pk1
+            self.analysis_val1 = val1
+            self.analysis_val2 = val2
+            self.analysis_val3 = val3
+
+        def __eq__(self, other):
+            if not isinstance(other, CombinedAnalysis):
+                return NotImplemented
+            return (
+                self.analysis_val1 == other.analysis_val1
+                and self.analysis_val2 == other.analysis_val2
+                and self.analysis_val3 == other.analysis_val3
+            )
+
+    def complex_data_analysis(cfg, session):
+        # collects some data upto some point
+        dataset1 = session.query(Data1).filter(Data1.utc_time < cfg["final_time"])
+        dataset2 = session.query(Data2).filter(Data2.utc_time < cfg["final_time"])
+        dataset3 = session.query(Data3).filter(Data3.utc_time < cfg["final_time"])
+        # performs some analysis
+        analysis12 = analysis(dataset1, dataset2)
+        analysis13 = analysis(dataset1, dataset3)
+        analysis23 = analysis(dataset2, dataset3)
+        # combine the data analysis (returns object CombinedAnalysis)
+        combined_analysis = intergrate_analysis(analysis12, analysis13, analysis23)
+        # assume the combined_analysis are stored in some SQL table
+        self.session.add_all(combined_analysis)
+        self.session.commit()
+
+When using the :mod:`mock-alchemy` package, the test function can now test this ``complex_data_analysis`` function despite it containing multiple calls to SQL and combining those calls.
+Here is an example of how this might look. Assume the file detailed above is called ``data_analysis``.
+
+.. code-block:: python
+
+    import datetime
+    import mock
+
+    import pytest
+    from mock_alchemy.mocking import UnifiedAlchemyMagicMock
+
+    from data_analysis import complex_data_analysis, Data1, Data2, Data3, CombinedAnalysis
+
+    def test_data_analysis():
+        stop_time = datetime.datetime.utcnow()
+        cfg = {
+            "final_time": stop_time
+        }
+        data1_values = [
+            Data1(1, some, data, values),
+            Data1(2, some, data, values),
+            Data1(3, some, data, values),
+        ]
+        data2_values = [
+            Data2(1, some, data, values),
+            Data2(2, some, data, values),
+            Data2(3, some, data, values),
+        ]
+        data3_values = [
+            Data3(1, some, data, values),
+            Data3(2, some, data, values),
+            Data3(3, some, data, values),
+        ]
+        session = UnifiedAlchemyMagicMock(data=[
+            (
+                [mock.call.query(Data1),
+                 mock.call.filter(Data1.utc_time < stop_time)],
+                data1_values
+            ),
+            (
+                [mock.call.query(Data2),
+                 mock.call.filter(Data2.utc_time < stop_time)],
+                data2_values
+            ),
+            (
+                [mock.call.query(Data3),
+                 mock.call.filter(Data3.utc_time < stop_time)],
+                data3_values
+            ),
+        ])
+        complex_data_analysis(cfg, session)
+        expected_anyalsis = [
+            CombinedAnalysis(1, some, anyalsis, values),
+            CombinedAnalysis(2, some, anyalsis, values),
+            CombinedAnalysis(3, some, anyalsis, values),
+        ]
+        combined_anyalsis = session.query(CombinedAnalysis).all()
+        assert sorted(combined_anyalsis, key=lambda x: x.pk1) == sorted(expected_anyalsis, key=lambda x: x.pk1)
+
+
+Assert Calls
+^^^^^^^^^^^^
+
+Consider a scenario where we simply want to test whether certain SqlAlchemy statements have been called.
+This will not verify the actual data processing but will enable a degree of testing verification to ensure
+that either the correct branches are taken or that other functions call upon the session an appropriate amount
+of times. This ability can be combined with ``UnifiedAlchemyMagicMock`` to combine both data checking and the
+correct SqlAlchemy calls.
+
+For example, consider the following function we want to test.
+
+.. code-block:: python
+
+    def alchemy_stmts(session):
+        q = session.query(Model).filter(Model.foo == 5)
+        q = some_func(q)
+        q.filter(Model.baz > 11)
+        if condition
+
+
+To test this function, we can use the
+
+.. code-block:: python
+
+    from mock_alchemy.mocking import UnifiedAlchemyMagicMock
+
+    def test_stms():
+        session = UnifiedAlchemyMagicMock()
+        session.filter.assert_has_calls([
+            mock.call(Model.foo == 5, Model.som_attr < 31, Model.baz > 11),
+            mock.call(Model.note == 'hello world'),
+        ])
+
+With the combination of this example and the :ref:`previous example <data_stubbing>`, we can use ``UnifiedAlchemyMagicMock`` to assert calls
+to check branching in code and verify data values using a mock SqlAlchemy session
+
+Getting and Deleting
+^^^^^^^^^^^^^^^^^^^^
+
+Let us return the :ref:`previous example <data_stubbing>`, but now we can test deleting as well.
+We modify the ``complex_data_analysis`` to be:
+
+.. code-block:: python
+
+    def complex_data_analysis(cfg, session):
+        # collects some data upto some point
+        dataset1 = session.query(Data1).filter(Data1.utc_time < cfg["final_time"])
+        dataset2 = session.query(Data2).filter(Data2.utc_time < cfg["final_time"])
+        dataset3 = session.query(Data3).filter(Data3.utc_time < cfg["final_time"])
+        # performs some analysis
+        analysis12 = analysis(dataset1, dataset2)
+        analysis13 = analysis(dataset1, dataset3)
+        analysis23 = analysis(dataset2, dataset3)
+        # combine the data analysis (returns object CombinedAnalysis)
+        combined_analysis = intergrate_analysis(analysis12, analysis13, analysis23)
+        # assume the combined_analysis are stored in some SQL table
+        self.session.add_all(combined_analysis)
+        session.query(Data3).filter(Data3.utc_time < cfg["final_time"]).delete()
+        self.session.commit()
+
+We also modify the test function now to ensure that we correctly deleted the data. Additionally, we can use get to check
+for specific objects being present and ensure their values are correct and still intact.
+
+.. code-block:: python
+
+    import datetime
+    import mock
+
+    import pytest
+    from mock_alchemy.mocking import UnifiedAlchemyMagicMock
+
+    from data_analysis import complex_data_analysis, Data1, Data2, Data3, CombinedAnalysis
+
+    def test_data_analysis():
+        stop_time = datetime.datetime.utcnow()
+        cfg = {
+            "final_time": stop_time
+        }
+        data1_values = [
+            Data1(1, some, data, values),
+            Data1(2, some, data, values),
+            Data1(3, some, data, values),
+        ]
+        data2_values = [
+            Data2(1, some, data, values),
+            Data2(2, some, data, values),
+            Data2(3, some, data, values),
+        ]
+        data3_values = [
+            Data3(1, some, data, values),
+            Data3(2, some, data, values),
+            Data3(3, some, data, values),
+        ]
+        session = UnifiedAlchemyMagicMock(data=[
+            (
+                [mock.call.query(Data1),
+                 mock.call.filter(Data1.utc_time < stop_time)],
+                data1_values
+            ),
+            (
+                [mock.call.query(Data2),
+                 mock.call.filter(Data2.utc_time < stop_time)],
+                data2_values
+            ),
+            (
+                [mock.call.query(Data3),
+                 mock.call.filter(Data3.utc_time < stop_time)],
+                data3_values
+            ),
+        ])
+        complex_data_analysis(cfg, session)
+        expected_anyalsis = [
+            CombinedAnalysis(1, some, anyalsis, values),
+            CombinedAnalysis(2, some, anyalsis, values),
+            CombinedAnalysis(3, some, anyalsis, values),
+        ]
+        combined_anyalsis = session.query(CombinedAnalysis).all()
+        assert sorted(combined_anyalsis, key=lambda x: x.pk1) == sorted(expected_anyalsis, key=lambda x: x.pk1)
+        assert [] == session.query(Data3).filter(Data3.utc_time < cfg["final_time"])
+        expected_anyalsis3 = CombinedAnalysis(3, some, anyalsis, values)
+        anyalsis3 = session.query(CombinedAnalysis).get({"pk1": 3})
+        assert anyalsis3 == expected_anyalsis3
+
+Contribute
+-----------
+
+This concludes the example section. If you found these examples lacking in any form, or found a use
+for this library in a manner in which these examples failed to illustrate, feel free to contribute to this
+documentation. The best way to contribute is to either open an issue or a pull request to suggest changes. If
+these examples failed to be useful, feel free to open an issue asking for either more examples or explaining
+what is currently unclear. For more details on how to contribute, check out the :ref:`contributor guide <contributor_guide>`.
