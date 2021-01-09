@@ -24,7 +24,7 @@ SQLAlchemy mock helpers.
 Documentation
 -------------
 
-Full documentation is available at ``http://mock-alchemy.rtfd.io/ <http://mock-alchemy.rtfd.io/>`__.
+Full documentation is available at `http://mock-alchemy.rtfd.io/ <http://mock-alchemy.rtfd.io/>`__.
 This README includes some basic examples.
 
 Credit
