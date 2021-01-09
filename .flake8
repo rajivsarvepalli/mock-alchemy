@@ -1,0 +1,9 @@
+[flake8]
+select = ANN,B,B9,BLK,C,D,DAR,E,F,I,S,W
+ignore = E203,E501,W503, ANN101
+max-line-length = 88
+max-complexity = 15
+application-import-names = simple_hierarchy,tests
+import-order-style = pep8
+docstring-convention = google
+per-file-ignores = tests/*:S101
