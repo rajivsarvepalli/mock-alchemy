@@ -48,7 +48,10 @@ pytest = [
     { version = "^6.2.1", python = "^3.6" }
 ]
 pytest-cov = "^2.10.1"
-tox = "^3.21.0"
+tox = [
+    {version = "3.20.1", python = "^2.7"},
+    { version = "^3.21.0", python = "^3.6" }
+]
 pre-commit = { version = "^2.9", python = "^3.6" }
 pre-commit-hooks = { version = "^3.0", python = "^3.6" }
 
