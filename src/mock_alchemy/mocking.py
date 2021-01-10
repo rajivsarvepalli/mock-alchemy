@@ -39,7 +39,7 @@ class UnorderedTuple(tuple):
             try:
                 other.remove(i)
             except ValueError:
-                return True
+                return False
 
         return True
 
