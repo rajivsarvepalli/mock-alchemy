@@ -1,5 +1,8 @@
 name: Python2-Branch-Tests
-push:
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the 0.1.x branch
+  push:
     branches:
       - 0.1.x
   pull_request:
