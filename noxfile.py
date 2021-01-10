@@ -6,7 +6,7 @@ import nox
 from nox.sessions import Session
 
 package = "mock_alchemy"
-nox.options.sessions = "lint", "safety", "tests", "xdoctest"
+nox.options.sessions = "lint", "safety", "tests"
 locations = "src", "tests", "noxfile.py", "docs/conf.py"
 
 
@@ -63,6 +63,7 @@ def lint(session: Session) -> None:
         "flake8-docstrings",
         "flake8-import-order",
         "darglint",
+        "pep8-naming",
     )
     session.run("flake8", *args)
 
