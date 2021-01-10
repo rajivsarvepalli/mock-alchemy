@@ -1,8 +1,9 @@
 name: Tests
 on:
   push:
+  pull_request:
     branches:
-    - master
+      - master
 jobs:
   build:
     runs-on: ubuntu-latest

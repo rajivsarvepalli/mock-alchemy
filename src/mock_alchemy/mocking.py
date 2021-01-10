@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, unicode_literals
+
 from functools import partial
 from itertools import chain, takewhile
+from unittest import mock
 
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
 from .comparison import ExpressionMatcher
-from .compat import mock
 from .utils import (
     build_identity_map,
     copy_and_update,
@@ -15,7 +16,6 @@ from .utils import (
     raiser,
     setattr_tmp,
 )
-
 
 Call = type(mock.call)
 
@@ -39,7 +39,7 @@ class UnorderedTuple(tuple):
             try:
                 other.remove(i)
             except ValueError:
-                return False
+                return True
 
         return True
 
@@ -547,7 +547,6 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                 )
                 if mocked_data:
                     # remove objects based on the same instances
-                    num_deleted = len(to_delete)
                     for row in to_delete:
                         mocked_data[1].remove(row)
             # we delete the data from the specific query

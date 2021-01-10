@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, unicode_literals
 
+from unittest import mock
+
 import six
 from six.moves.collections_abc import Mapping
 from sqlalchemy import func
 from sqlalchemy.sql.expression import column, or_
 
-from .compat import mock
 from .utils import match_type
-
 
 ALCHEMY_UNARY_EXPRESSION_TYPE = type(column("").asc())
 ALCHEMY_BINARY_EXPRESSION_TYPE = type(column("") == "")
