@@ -615,7 +615,7 @@ requests = "*"
 name = "six"
 version = "1.15.0"
 description = "Python 2 and 3 compatibility utilities"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -865,7 +865,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "e00168af3242fbdbda98db47eeaecf3f5a41a2df95375689c64b8e2e8b4eedec"
+content-hash = "489c8fc89e0988b94faa6c4d9c2b43f7b3fd9c9bc0533d7453783c91640d2d23"
 
 [metadata.files]
 alabaster = [

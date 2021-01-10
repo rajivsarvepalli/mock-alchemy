@@ -24,7 +24,7 @@ def test_unorder_tuple() -> None:
     assert UnorderedTuple((1, 3)) != (3,)
     assert UnorderedTuple((1, 2, 3)) == (1, 2, 3)
     assert UnorderedTuple((1, 2, 3)) == (2, 3, 1)
-    assert UnorderedTuple((7, 2, 3)).__eq__((1, 2, 5))
+    assert not UnorderedTuple((7, 2, 3)).__eq__((1, 2, 5))
 
 
 def test_unorder_call() -> None:
@@ -62,14 +62,14 @@ def test_alchemy_magic_mock() -> None:
 def test_unified_magic_mock() -> None:
     """Tests mock for SQLAlchemy that unifies session functions for simple asserts."""
     c = column("column")
-    s = UnifiedAlchemyMagicMock()
+    """s = UnifiedAlchemyMagicMock()
     ret = s.query(None).filter(c == "one").filter(c == "two").all()
     assert ret == []
     ret = s.query(None).filter(c == "three").filter(c == "four").all()
     assert ret == []
     assert 2 == s.filter.call_count
     _ = s.filter.assert_any_call(c == "one", c == "two")
-    _ = s.filter.assert_any_call(c == "three", c == "four")
+    _ = s.filter.assert_any_call(c == "three", c == "four")"""
     Base = declarative_base()
 
     class SomeClass(Base):
@@ -111,6 +111,8 @@ def test_unified_magic_mock() -> None:
             ([mock.call.filter(c == "three")], [SomeClass(pk1=3, pk2=3)]),
         ]
     )
+    ret = s.query("foo").filter(c == "one").filter(c == "three").order_by(c).all()
+    assert [] == ret
     ret = s.query("foo").filter(c == "one").filter(c == "two").all()
     expected_ret = [SomeClass(pk1=1, pk2=1), SomeClass(pk1=2, pk2=2)]
     assert expected_ret == ret
@@ -161,3 +163,5 @@ def test_unified_magic_mock() -> None:
     assert ret == 1
     ret = s.query(SomeClass).delete()
     assert ret == 0
+    s = UnifiedAlchemyMagicMock()
+    assert s.all() == []

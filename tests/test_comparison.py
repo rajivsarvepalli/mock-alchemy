@@ -44,3 +44,6 @@ def test_expression_matcher() -> None:
     assert ExpressionMatcher([c == "foo"]) == [c == "foo"]
     assert ExpressionMatcher(l1) != l4
     assert ExpressionMatcher(e1) != e3
+    assert ExpressionMatcher(column("column") == "one") != ExpressionMatcher(
+        column("column") == "three"
+    )

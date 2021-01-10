@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, unicode_literals
 
+import itertools
+from collections.abc import Mapping
 from unittest import mock
 
-import six
-from six.moves.collections_abc import Mapping
 from sqlalchemy import func
 from sqlalchemy.sql.expression import column, or_
 
@@ -54,7 +54,7 @@ class PrettyExpression(object):
 
         return "{}(sql={!r}, params={!r})".format(
             self.expr.__class__.__name__,
-            match_type(six.text_type(compiled).replace("\n", " "), str),
+            match_type(str(compiled).replace("\n", " "), str),
             {match_type(k, str): v for k, v in compiled.params.items()},
         )
 
@@ -125,9 +125,7 @@ class ExpressionMatcher(PrettyExpression):
             return True
 
         # handle string comparison bytes vs unicode in dict keys
-        if isinstance(self.expr, six.string_types) and isinstance(
-            other, six.string_types
-        ):
+        if isinstance(self.expr, str) and isinstance(other, str):
             other = match_type(other, type(self.expr))
 
         # compare sqlalchemy public api attributes
@@ -141,7 +139,7 @@ class ExpressionMatcher(PrettyExpression):
 
             if isinstance(self.expr, (list, tuple)):
                 return all(
-                    _(i) == j for i, j in six.moves.zip_longest(self.expr, other)
+                    _(i) == j for i, j in itertools.zip_longest(self.expr, other)
                 )
 
             elif isinstance(self.expr, Mapping):
@@ -156,9 +154,11 @@ class ExpressionMatcher(PrettyExpression):
         expr_compiled = self.expr.compile()
         other_compiled = other.compile()
 
-        if six.text_type(expr_compiled) != six.text_type(other_compiled):
+        if str(expr_compiled) != str(other_compiled):
             return False
-
+        print(expr_compiled.params)
+        print(other_compiled.params)
+        print(expr_compiled.params == other_compiled.params)
         if expr_compiled.params != other_compiled.params:
             return False
 

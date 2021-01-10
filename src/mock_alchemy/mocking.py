@@ -39,7 +39,7 @@ class UnorderedTuple(tuple):
             try:
                 other.remove(i)
             except ValueError:
-                return True
+                return False
 
         return True
 
@@ -505,6 +505,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                         for i in calls
                     ]
                     if all(c in previous_calls for c in calls):
+
                         return self.boundary[_mock_name](result, *args, **kwargs)
 
         return self.boundary[_mock_name](_mock_default, *args, **kwargs)

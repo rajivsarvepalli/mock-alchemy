@@ -3,7 +3,6 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from contextlib import contextmanager
 
-import six
 from sqlalchemy import inspect
 
 
@@ -13,14 +12,14 @@ def match_type(s, t):
 
     For example::
 
-        >>> assert type(match_type(b'hello', six.binary_type)) is six.binary_type
-        >>> assert type(match_type(u'hello', six.text_type)) is six.text_type
-        >>> assert type(match_type(b'hello', six.text_type)) is six.text_type
-        >>> assert type(match_type(u'hello', six.binary_type)) is six.binary_type
+        >>> assert type(match_type(b'hello', bytes)) is bytes
+        >>> assert type(match_type(u'hello', str)) is str
+        >>> assert type(match_type(b'hello', str)) is str
+        >>> assert type(match_type(u'hello', bytes)) is bytes
     """
     if isinstance(s, t):
         return s
-    if t is six.text_type:
+    if t is str:
         return s.decode("utf-8")
     else:
         return s.encode("utf-8")
