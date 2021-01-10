@@ -6,7 +6,7 @@ import nox
 from nox.sessions import Session
 
 package = "mock_alchemy"
-nox.options.sessions = "lint", "safety", "tests"
+nox.options.sessions = "lint", "safety", "tests", "xdoctest"
 locations = "src", "tests", "noxfile.py", "docs/conf.py"
 
 

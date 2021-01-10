@@ -1,6 +1,5 @@
 """Testing the module for utils in mock-alchemy."""
 import pytest
-import six
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -17,10 +16,10 @@ from mock_alchemy.utils import (
 
 def test_match_type() -> None:
     """Tests matching string type."""
-    assert type(match_type(b"hello", six.binary_type)) is six.binary_type
-    assert type(match_type(b"hello", six.text_type)) is six.text_type
-    assert type(match_type(u"hello", six.binary_type)) is six.binary_type
-    assert type(match_type(b"hello", six.binary_type)) is six.binary_type
+    assert type(match_type(b"hello", bytes)) is bytes
+    assert type(match_type(b"hello", str)) is str
+    assert type(match_type(u"hello", bytes)) is bytes
+    assert type(match_type(b"hello", str)) is str
 
 
 def test_copy_update() -> None:
