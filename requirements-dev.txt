@@ -1,15 +1,25 @@
 -r requirements.txt
-black; python_version > '3.6'
+black
 collective.checkdocs
 coverage[toml]
 flake8
-flake8-bugbear; python_version > '3.5'
-importanize
-mock
-pdbpp
-pre-commit
-pre-commit-hooks
-ptpython
+flake8-bugbear
+flake8-bandit
+flake8-black
+flake8-bugbear
+flake8-import-order
+flake8-annotations
+flake8-docstrings
+darglint
+safety
+mypy
+typeguard
+xdoctest
+Sphinx
+isort
+codecov
+sphinx-copybutton
+pydata-sphinx-theme
 pytest
 pytest-cov
-tox==3.12.1
+nox

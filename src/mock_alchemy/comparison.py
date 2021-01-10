@@ -121,9 +121,7 @@ class ExpressionMatcher(PrettyExpression):
         # if the right hand side is mock.ANY,
         # mocks comparison will not be used hence
         # we hard-code comparison here
-        if isinstance(self.expr, type(mock.ANY)) or isinstance(
-            other, type(mock.ANY)
-        ):
+        if isinstance(self.expr, type(mock.ANY)) or isinstance(other, type(mock.ANY)):
             return True
 
         # handle string comparison bytes vs unicode in dict keys
@@ -143,8 +141,7 @@ class ExpressionMatcher(PrettyExpression):
 
             if isinstance(self.expr, (list, tuple)):
                 return all(
-                    _(i) == j
-                    for i, j in six.moves.zip_longest(self.expr, other)
+                    _(i) == j for i, j in six.moves.zip_longest(self.expr, other)
                 )
 
             elif isinstance(self.expr, Mapping):
