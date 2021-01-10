@@ -23,4 +23,3 @@ jobs:
       env:
         CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
       run: nox --sessions tests-3.8 coverage
-
