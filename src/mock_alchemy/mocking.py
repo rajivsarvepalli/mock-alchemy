@@ -115,8 +115,9 @@ class AlchemyMagicMock(mock.MagicMock):
         >>> _ = s.filter.assert_called_once_with(c == 10)
         Traceback (most recent call last):
         ...
-        AssertionError: Expected call: filter(BinaryExpression(sql='"column" = :column_1', params={'column_1': 10}))
-        Actual call: filter(BinaryExpression(sql='"column" = :column_1', params={'column_1': 5}))
+        AssertionError: expected call not found.
+        Expected: filter(BinaryExpression(sql='"column" = :column_1', params={'column_1': 10}))
+        Actual: filter(BinaryExpression(sql='"column" = :column_1', params={'column_1': 5}))
     """
 
     def __init__(self, *args, **kwargs):
@@ -139,22 +140,16 @@ class AlchemyMagicMock(mock.MagicMock):
             "call_args_list",
             [sqlalchemy_call(i) for i in self.call_args_list],
         ):
-            return super(AlchemyMagicMock, self).assert_any_call(
-                *args, **kwargs
-            )
+            return super(AlchemyMagicMock, self).assert_any_call(*args, **kwargs)
 
     def assert_has_calls(self, calls, any_order=False):
         calls = [sqlalchemy_call(i) for i in calls]
         with setattr_tmp(
             self,
             "mock_calls",
-            type(self.mock_calls)(
-                [sqlalchemy_call(i) for i in self.mock_calls]
-            ),
+            type(self.mock_calls)([sqlalchemy_call(i) for i in self.mock_calls]),
         ):
-            return super(AlchemyMagicMock, self).assert_has_calls(
-                calls, any_order
-            )
+            return super(AlchemyMagicMock, self).assert_has_calls(calls, any_order)
 
 
 class UnifiedAlchemyMagicMock(AlchemyMagicMock):
@@ -250,11 +245,11 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         >>> s.query('bar').filter(c == 'one').filter(c == 'two').one()
         Traceback (most recent call last):
         ...
-        NoResultFound: No row was found for one()
+        sqlalchemy.orm.exc.NoResultFound: No row was found for one()
         >>> s.query('foo').filter(c == 'one').filter(c == 'two').one()
         Traceback (most recent call last):
         ...
-        MultipleResultsFound: Multiple rows were found for one()
+        sqlalchemy.orm.exc.MultipleResultsFound: Multiple rows were found for one()
         >>> s.query('bar').filter(c == 'one').filter(c == 'two').one_or_none()
 
         # .get()
@@ -359,9 +354,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         "one": lambda x: (
             x[0]
             if len(x) == 1
-            else raiser(
-                MultipleResultsFound, "Multiple rows were found for one()"
-            )
+            else raiser(MultipleResultsFound, "Multiple rows were found for one()")
             if x
             else raiser(NoResultFound, "No row was found for one()")
         ),
@@ -398,9 +391,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
         kwargs.update(
             {
-                k: AlchemyMagicMock(
-                    side_effect=partial(self._get_data, _mock_name=k)
-                )
+                k: AlchemyMagicMock(side_effect=partial(self._get_data, _mock_name=k))
                 for k in self.boundary
             }
         )
@@ -428,9 +419,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         super(UnifiedAlchemyMagicMock, self).__init__(*args, **kwargs)
 
     def _get_previous_calls(self, calls):
-        return iter(
-            takewhile(lambda i: i[0] not in self.boundary, reversed(calls))
-        )
+        return iter(takewhile(lambda i: i[0] not in self.boundary, reversed(calls)))
 
     def _get_previous_call(self, name, calls):
         # get all previous session calls within same session query
@@ -445,12 +434,8 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         _mock_name = kwargs.pop("_mock_name")
         submock = getattr(self, _mock_name)
 
-        previous_method_call = self._get_previous_call(
-            _mock_name, self.method_calls
-        )
-        previous_mock_call = self._get_previous_call(
-            _mock_name, self.mock_calls
-        )
+        previous_method_call = self._get_previous_call(_mock_name, self.method_calls)
+        previous_mock_call = self._get_previous_call(_mock_name, self.mock_calls)
 
         if previous_mock_call is None:
             return submock.return_value
@@ -494,9 +479,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                 )
                 for i in self._get_previous_calls(self.mock_calls[:-1])
             ]
-            sorted_mock_data = sorted(
-                _mock_data, key=lambda x: len(x[0]), reverse=True
-            )
+            sorted_mock_data = sorted(_mock_data, key=lambda x: len(x[0]), reverse=True)
 
             if _mock_name == "get":
                 query_call = [c for c in previous_calls if c[0] == "query"][0]
@@ -522,9 +505,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                         for i in calls
                     ]
                     if all(c in previous_calls for c in calls):
-                        return self.boundary[_mock_name](
-                            result, *args, **kwargs
-                        )
+                        return self.boundary[_mock_name](result, *args, **kwargs)
 
         return self.boundary[_mock_name](_mock_default, *args, **kwargs)
 
