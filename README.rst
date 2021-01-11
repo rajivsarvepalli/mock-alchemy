@@ -31,7 +31,15 @@ This README includes some basic examples, but more detailed examples are include
 
 Versioning
 ----------
-different versions based on python version
+
+There are several different versions of ``mock-alchemy`` available depending on your needs. The versions ``0.1.x`` are available for use on
+Python 2.7, Python 3.6+. The newer versions serve users who are on Python 3.7+. For people interested in contributing, if you want to work
+on Python 2.7 version checkout the branch `0.1.x` and then create pull-requests to that branch. There is a set of specific tests run for that
+branch on pushes and pull-requests since there are different tests for the newer versions of ``mock-alchemy``. Check out `contributor guide <http://mock-alchemy.rtfd.io/en/latest/contributor_guide>`__
+for more information. Documentation for the 0.1.0 version is `available <https://mock-alchemy.readthedocs.io/en/v0.1.0/>`__. However, the current documentation should do a sufficient
+job at illustrating both the past and the features of the present version at least as of now. Therefore, I suggest using the most recent documentation for now, and if you want, you can switch using
+the readthedocs version system (click on the drop-down menu on the bottom right of the screen on the documentation or go to the `project page <https://readthedocs.org/projects/mock-alchemy/>`__).
+
 
 Credit
 ----------
@@ -47,6 +55,12 @@ Installing
 You can install ``mock-alchemy`` using pip::
 
     $ pip install mock-alchemy
+
+If you want to use this package on Python 2.7 or Python 3.6, then install ``mock-alchemy`` using::
+
+    $ pip install "mock-alchemy>=0.1.0,<0.2.0"
+
+Pip should auto-detect the correct version but this ensures the correct version is downloaded for your needs.
 
 Why?
 ----

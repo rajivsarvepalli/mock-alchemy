@@ -5,7 +5,6 @@ coverage[toml]
 flake8
 flake8-bugbear
 flake8-bandit
-flake8-black
 flake8-bugbear
 flake8-import-order
 flake8-annotations
@@ -25,3 +24,6 @@ pytest
 pytest-cov
 nox
 reorder-python-imports
+flake8-rst-docstrings
+pre-commit
+pre-commit-hooks

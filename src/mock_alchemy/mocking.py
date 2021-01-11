@@ -215,6 +215,20 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
     MagicMock which unifies common SQLALchemy session functions for easier assertions.
 
+    Attributes:
+        boundary: A dict of SQLAlchemy functions or statements that get
+            or retreive data from calls. This dictionary has values
+            that are the callable functions to process the function calls.
+        unify: A dict of SQLAlchemy functions or statements that are to
+            unifying expressions together. This dictionary has values
+            that are the callable functions to process the function calls. Note
+            that across query calls data and, as such, these calls are not unified.
+            Check out the examples for this class for more detail about this
+            limitation.
+        mutate: A set of operations that mutate data. The currently supported
+            operations include ``.delete()``, ``.add()``, and ``.add_all()``.
+            More operations are planned and this is a future area of work.
+
     For example::
 
         >>> from sqlalchemy.sql.expression import column
@@ -229,20 +243,6 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         2
         >>> s.filter.assert_any_call(c == 'one', c == 'two')
         >>> s.filter.assert_any_call(c == 'three', c == 'four')
-
-    Attributes:
-        boundary: A dict of SQLAlchemy functions or statements that get
-            or retreive data from calls. This dictionary has values
-            that are the callable functions to process the function calls.
-        unify: A dict of SQLAlchemy functions or statements that are to
-            unifying expressions together. This dictionary has values
-            that are the callable functions to process the function calls. Note
-            that across query calls data and, as such, these calls are not unified.
-            Check out the examples for this class for more detail about this
-            limitation.
-        mutate: A set of operations that mutate data. The currently supported
-            operations include ``.delete()``, ``.add()``, and ``.add_all()``.
-            More operations are planned and this is a future area of work.
 
     In addition, mock data be specified to stub real DB interactions.
     Result-sets are specified per filtering criteria so that unique data
