@@ -17,10 +17,11 @@ mypy
 typeguard
 xdoctest
 Sphinx
-isort
+Pygments
 codecov
 sphinx-copybutton
 pydata-sphinx-theme
 pytest
 pytest-cov
 nox
+reorder-python-imports

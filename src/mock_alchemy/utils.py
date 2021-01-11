@@ -1,14 +1,33 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, unicode_literals
+"""A module for utils for the ``mock-alchemy`` library."""
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
 
 from contextlib import contextmanager
+from typing import Any
+from typing import Dict
+from typing import Sequence
+from typing import Tuple
+from typing import Type
+from typing import Union
 
 from sqlalchemy import inspect
 
 
-def match_type(s, t):
-    """
-    Match string type
+def match_type(
+    s: Union[bytes, str], t: Union[Type[bytes], Type[str]]
+) -> Union[bytes, str]:
+    """Match the string type.
+
+    Matches the string type with the provided type and returns the string
+    of the desired type.
+
+    Args:
+        s: The string to match the type with.
+        t: The type to make the string with.
+
+    Returns:
+        An object of the desired type of type ``t``.
 
     For example::
 
@@ -25,9 +44,18 @@ def match_type(s, t):
         return s.encode("utf-8")
 
 
-def copy_and_update(target, updater):
-    """
-    Copy dictionary and update it all in one operation
+def copy_and_update(target: Dict, updater: Dict) -> Dict:
+    """Copy and update dictionary.
+
+    Copy dictionary and update it all in one operation.
+
+    Args:
+        target: The dictionary to copy and update.
+        updater: The updating dictionary.
+
+    Returns:
+        Dict: A new dictionary of the ``target`` copied and
+        updated by ``updater``.
 
     For example::
 
@@ -43,10 +71,22 @@ def copy_and_update(target, updater):
     return result
 
 
-def indexof(needle, haystack):
-    """
-    Find an index of ``needle`` in ``haystack`` by looking for exact same item by pointer ids
-    vs usual ``list.index()`` which finds by object comparison.
+def indexof(needle: Any, haystack: Sequence[Any]) -> int:
+    """Gets the index of some item in a sequence.
+
+    Find an index of ``needle`` in ``haystack`` by looking for exact same
+    item by pointer ids vs usual ``list.index()`` which finds
+    by object comparison.
+
+    Args:
+        needle: The object or item to find in the sequence.
+        haystack: The sequence of items to search for the ``needle``.
+
+    Returns:
+        The index of the needle in the haystack.
+
+    Raises:
+        ValueError: If the needle is not found inside the haystack.
 
     For example::
 
@@ -67,9 +107,22 @@ def indexof(needle, haystack):
 
 
 @contextmanager
-def setattr_tmp(obj, name, value):
-    """
-    Utility for temporarily setting value in an object
+def setattr_tmp(obj: object, name: str, value: Any) -> Any:
+    """Set the atrributes of object temporarily.
+
+    Utility for temporarily setting value in an object.
+
+    Args:
+        obj: An object to set the attribute of.
+        name: The name of the attribute.
+        value: The value to set the attribute to.
+
+    Returns:
+        A context manager that can be used.
+
+    Yields:
+        Used for the context manager so that this function can be used
+        as ``with setattr_tmp``.
 
     For example::
 
@@ -101,11 +154,19 @@ def setattr_tmp(obj, name, value):
         setattr(obj, name, original)
 
 
-def raiser(exp, *args, **kwargs):
-    """
-    Utility for raising exceptions
+def raiser(exp: Type[Exception], *args: Any, **kwargs: Any) -> Type[Exception]:
+    """Raises an exception with the given args.
 
-    Useful in one-liners
+    Utility for raising exceptions
+    Useful in one-liners.
+
+    Args:
+        exp: The exception to raise.
+        args: The args to use for the exception.
+        kwargs: The kwargs to use for the exception.
+
+    Raises:
+        exp: The parameterized exception of the specified kind.
 
     For example::
 
@@ -119,9 +180,16 @@ def raiser(exp, *args, **kwargs):
     raise exp(*args, **kwargs)
 
 
-def build_identity_map(items):
-    """
-    Utility for building identity map from given sqlalchemy models
+def build_identity_map(items: Sequence[Any]) -> Dict:
+    """Builds identity map.
+
+    Utility for building identity map from given SQLAlchemy models.
+
+    Args:
+        items: A sequence of SQLAlchemy objects.
+
+    Returns:
+        An identity map of the given SQLAlchemy objects.
 
     For example::
 
@@ -154,9 +222,21 @@ def build_identity_map(items):
     return idmap
 
 
-def get_item_attr(idmap, access):
-    """
+def get_item_attr(idmap: Dict, access: Union[Dict, Tuple, int]) -> Any:
+    """Access dictionary in different methods.
+
     Utility for accessing dict by different key types (for get).
+
+    Args:
+        idmap: A dictionary of identity map of SQLAlchemy objects.
+        access: The access pattern which should either be int, dictionary, or
+            a tuple. If it is dictionary it should map to the names of the primary keys
+            of the SQLAlchemy objects. If it is a tuple, it should be a set of keys to
+            search for. If it is an int, then the objects in question must have only one
+            primary key.
+
+    Returns:
+        An SQlAlchemy object that was requested.
 
     For example::
         >>> idmap = {(1,): 2}

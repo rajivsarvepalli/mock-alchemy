@@ -2,13 +2,14 @@
 from unittest import mock
 
 from sqlalchemy import func
-from sqlalchemy.sql.expression import column, or_
+from sqlalchemy.sql.expression import column
 
-from mock_alchemy.comparison import ExpressionMatcher, PrettyExpression
+from mock_alchemy.comparison import ExpressionMatcher
+from mock_alchemy.comparison import PrettyExpression
 
 
 def test_pretty_expression() -> None:
-    """Tests pretty representations of SqlAlchemy expressions."""
+    """Tests pretty representations of SQLAlchemy expressions."""
     c = column("column")
     str_repr = (
         """BinaryExpression(sql='"column" = :column_1', params={'column_1': 5})"""
@@ -18,7 +19,7 @@ def test_pretty_expression() -> None:
 
 
 def test_expression_matcher() -> None:
-    """Tests expression matching of SqlAlchemy expressions."""
+    """Tests expression matching of SQLAlchemy expressions."""
     c = column("column")
     e1 = c.in_(["foo", "bar"])
     e2 = c.in_(["foo", "bar"])

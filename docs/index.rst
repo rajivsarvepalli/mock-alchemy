@@ -9,7 +9,9 @@ Mocking SQLAlchemy
    user_guide/index
    api_reference/index
    contributor_guide/index
+   Code of Conduct <codeofconduct>
    license
+
 
 **************************
 mock-alchemy documentation

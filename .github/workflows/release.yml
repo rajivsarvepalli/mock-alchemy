@@ -6,11 +6,11 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v1
-      with:
-        python-version: '3.8'
-        architecture: x64
-    - run: pip install poetry==1.1.4
-    - run: poetry build
-    - run: poetry publish --username=__token__ --password=${{ secrets.PYPI_TOKEN }}
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: "3.8"
+          architecture: x64
+      - run: pip install --constraint=.github/workflows/constraints.txt poetry
+      - run: poetry build
+      - run: poetry publish --username=__token__ --password=${{ secrets.PYPI_TOKEN }}

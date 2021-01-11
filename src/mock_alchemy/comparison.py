@@ -1,12 +1,18 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, unicode_literals
+"""A module for comparing SQLAlchemy expressions."""
+from __future__ import absolute_import
+from __future__ import annotations
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import itertools
 from collections.abc import Mapping
+from typing import Any
+from typing import Optional
 from unittest import mock
 
 from sqlalchemy import func
-from sqlalchemy.sql.expression import column, or_
+from sqlalchemy.sql.expression import column
+from sqlalchemy.sql.expression import or_
 
 from .utils import match_type
 
@@ -25,8 +31,13 @@ ALCHEMY_TYPES = (
 
 
 class PrettyExpression(object):
-    """
-    Wrapper around given expression with pretty representations
+    """Wrapper around given expression with pretty representations.
+
+    Wraps any expression in order to represent in a string in a pretty
+    fashion. This also enables easier comparison through string representations.
+
+    Attributes:
+        expr: Some kind of expression or a PrettyExpression itself.
 
     For example::
 
@@ -41,12 +52,14 @@ class PrettyExpression(object):
 
     __slots__ = ["expr"]
 
-    def __init__(self, e):
+    def __init__(self, e: Any) -> None:
+        """Create a PrettyExpression using an expression."""
         if isinstance(e, PrettyExpression):
             e = e.expr
         self.expr = e
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Get the string representation of a PrettyExpression."""
         if not isinstance(self.expr, ALCHEMY_TYPES):
             return repr(self.expr)
 
@@ -60,10 +73,10 @@ class PrettyExpression(object):
 
 
 class ExpressionMatcher(PrettyExpression):
-    """
-    Matcher for comparing SQLAlchemy expressions
+    """Matcher for comparing SQLAlchemy expressions.
 
-    Similar to http://www.voidspace.org.uk/python/mock/examples.html#more-complex-argument-matching
+    Similar to
+    http://www.voidspace.org.uk/python/mock/examples.html#more-complex-argument-matching
 
     For example::
 
@@ -110,11 +123,13 @@ class ExpressionMatcher(PrettyExpression):
 
         >>> ExpressionMatcher([c == 'foo']) == [c == 'foo']
         True
-        >>> ExpressionMatcher({'foo': c == 'foo', 'bar': 5, 'hello': 'world'}) == {'foo': c == 'foo', 'bar': 5, 'hello': 'world'}
+        >>> a = {'foo': c == 'foo', 'bar': 5, 'hello': 'world'}
+        >>> ExpressionMatcher(a) == a
         True
     """
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
+        """Compares two expressions using the ExpressionMatcher."""
         if isinstance(other, type(self)):
             other = other.expr
 
@@ -132,9 +147,25 @@ class ExpressionMatcher(PrettyExpression):
         if type(self.expr) is not type(other):
             return False
 
+        equal = self._equals_alchemy(other)
+        if equal is not None:
+            return equal
+
+        expr_compiled = self.expr.compile()
+        other_compiled = other.compile()
+
+        if str(expr_compiled) != str(other_compiled):
+            return False
+        if expr_compiled.params != other_compiled.params:
+            return False
+
+        return True
+
+    def _equals_alchemy(self, other: Any) -> Optional[bool]:
+        """Compares for equality in the case of non ALCHEMY_TYPES."""
         if not isinstance(self.expr, ALCHEMY_TYPES):
 
-            def _(v):
+            def _(v: Any) -> Any:
                 return type(self)(v)
 
             if isinstance(self.expr, (list, tuple)):
@@ -151,18 +182,6 @@ class ExpressionMatcher(PrettyExpression):
             else:
                 return self.expr is other or self.expr == other
 
-        expr_compiled = self.expr.compile()
-        other_compiled = other.compile()
-
-        if str(expr_compiled) != str(other_compiled):
-            return False
-        print(expr_compiled.params)
-        print(other_compiled.params)
-        print(expr_compiled.params == other_compiled.params)
-        if expr_compiled.params != other_compiled.params:
-            return False
-
-        return True
-
-    def __ne__(self, other):
+    def __ne__(self, other: Any) -> bool:
+        """Compares an expression to determine inequality."""
         return not (self == other)
