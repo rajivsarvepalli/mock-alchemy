@@ -1,136 +1,194 @@
 """Nox sessions."""
-import tempfile
-from typing import Any
+import shutil
+import sys
+from pathlib import Path
+from textwrap import dedent
 
 import nox
+import nox_poetry.patch
 from nox.sessions import Session
 
 package = "mock_alchemy"
-nox.options.sessions = "lint", "safety", "tests", "xdoctest"
-locations = "src", "tests", "noxfile.py", "docs/conf.py"
+python_versions = ["3.9", "3.8", "3.7"]
+nox.options.sessions = (
+    "pre-commit",
+    "safety",
+    "tests",
+    "typeguard",
+    "xdoctest",
+    "docs-build",
+)
 
 
-def install_with_constraints(session: Session, *args: str, **kwargs: Any) -> None:
-    """Install packages constrained by Poetry's lock file.
+def activate_virtualenv_in_precommit_hooks(session: Session) -> None:
+    """Activate virtualenv in hooks installed by pre-commit.
 
-    This function is a wrapper for nox.sessions.Session.install. It
-    invokes pip to install packages inside of the session's virtualenv.
-    Additionally, pip is passed a constraints file generated from
-    Poetry's lock file, to ensure that the packages are pinned to the
-    versions specified in poetry.lock. This allows you to manage the
-    packages as Poetry development dependencies.
+    This function patches git hooks installed by pre-commit to activate the
+    session's virtual environment. This allows pre-commit to locate hooks in
+    that environment when invoked from git.
 
-    Arguments:
+    Args:
         session: The Session object.
-        args: Command-line arguments for pip.
-        kwargs: Additional keyword arguments for Session.install.
-
     """
-    with tempfile.NamedTemporaryFile(delete=False) as requirements:
-        session.run(
-            "poetry",
-            "export",
-            "--dev",
-            "--format=requirements.txt",
-            "--without-hashes",
-            f"--output={requirements.name}",
-            external=True,
+    if session.bin is None:
+        return
+
+    virtualenv = session.env.get("VIRTUAL_ENV")
+    if virtualenv is None:
+        return
+
+    hookdir = Path(".git") / "hooks"
+    if not hookdir.is_dir():
+        return
+
+    for hook in hookdir.iterdir():
+        if hook.name.endswith(".sample") or not hook.is_file():
+            continue
+
+        text = hook.read_text()
+        bindir = repr(session.bin)[1:-1]  # strip quotes
+        if not (
+            Path("A") == Path("a") and bindir.lower() in text.lower() or bindir in text
+        ):
+            continue
+
+        lines = text.splitlines()
+        if not (lines[0].startswith("#!") and "python" in lines[0].lower()):
+            continue
+
+        header = dedent(
+            f"""\
+            import os
+            os.environ["VIRTUAL_ENV"] = {virtualenv!r}
+            os.environ["PATH"] = os.pathsep.join((
+                {session.bin!r},
+                os.environ.get("PATH", ""),
+            ))
+            """
         )
-        session.install(f"--constraint={requirements.name}", *args, **kwargs)
+
+        lines.insert(1, header)
+        hook.write_text("\n".join(lines))
 
 
-@nox.session(python="3.8")
-def format(session: Session) -> None:
-    """Run black and isort code formatter."""
-    args = session.posargs or locations
-    install_with_constraints(session, "black")
-    install_with_constraints(session, "isort")
-    session.run("isort", *args)
-    session.run("black", *args)
-
-
-@nox.session(python=["3.9", "3.8", "3.7"])
-def lint(session: Session) -> None:
-    """Lint using flake8."""
-    args = session.posargs or locations
-    install_with_constraints(
-        session,
+@nox.session(name="pre-commit", python="3.8")
+def precommit(session: Session) -> None:
+    """Lint using pre-commit."""
+    args = session.posargs or ["run", "--all-files"]
+    session.install(
+        "black",
+        "darglint",
         "flake8",
-        "flake8-annotations",
         "flake8-bandit",
-        "flake8-black",
         "flake8-bugbear",
         "flake8-docstrings",
+        "flake8-rst-docstrings",
+        "flake8-annotations",
         "flake8-import-order",
-        "darglint",
+        "reorder-python-imports",
         "pep8-naming",
+        "pre-commit",
+        "pre-commit-hooks",
     )
-    session.run("flake8", *args)
+    session.run("pre-commit", *args)
+    if args and args[0] == "install":
+        activate_virtualenv_in_precommit_hooks(session)
 
 
 @nox.session(python="3.8")
 def safety(session: Session) -> None:
     """Scan dependencies for insecure packages."""
-    with tempfile.NamedTemporaryFile(delete=False) as requirements:
-        session.run(
-            "poetry",
-            "export",
-            "--dev",
-            "--format=requirements.txt",
-            "--without-hashes",
-            f"--output={requirements.name}",
-            external=True,
-        )
-        install_with_constraints(session, "safety")
-        session.run("safety", "check", f"--file={requirements.name}", "--full-report")
+    requirements = nox_poetry.export_requirements(session)
+    session.install("safety")
+    session.run("safety", "check", f"--file={requirements}", "--bare")
 
 
-@nox.session(python=["3.9", "3.8", "3.7"])
+@nox.session(python=python_versions)
+def mypy(session: Session) -> None:
+    """Type-check using mypy."""
+    args = session.posargs or ["src", "tests", "docs/conf.py"]
+    session.install(".")
+    session.install("mypy", "pytest")
+    session.run("mypy", *args)
+    if not session.posargs:
+        session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
+
+
+@nox.session(python=python_versions)
 def tests(session: Session) -> None:
     """Run the test suite."""
-    args = session.posargs or ["--cov", "-m", "not e2e"]
-    session.run("poetry", "install", "--no-dev", external=True)
-    install_with_constraints(
-        session, "coverage[toml]", "pytest", "pytest-cov", "pytest-mock"
-    )
-    session.run("pytest", *args)
+    session.install(".")
+    session.install("coverage[toml]", "pytest", "pygments")
+    try:
+        session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
+    finally:
+        if session.interactive:
+            session.notify("coverage")
 
 
-@nox.session(python=["3.8", "3.7"])
+@nox.session
+def coverage(session: Session) -> None:
+    """Produce the coverage report."""
+    # Do not use session.posargs unless this is the only session.
+    has_args = session.posargs and len(session._runner.manifest) == 1
+    args = session.posargs if has_args else ["report"]
+
+    session.install("coverage[toml]")
+
+    if not has_args and any(Path().glob(".coverage.*")):
+        session.run("coverage", "combine")
+
+    session.run("coverage", *args)
+
+
+@nox.session(python=python_versions)
 def typeguard(session: Session) -> None:
     """Runtime type checking using Typeguard."""
-    args = session.posargs or ["-m", "not e2e"]
-    session.run("poetry", "install", "--no-dev", external=True)
-    install_with_constraints(session, "pytest", "pytest-mock", "typeguard")
-    session.run("pytest", f"--typeguard-packages={package}", *args)
+    session.install(".")
+    session.install("pytest", "typeguard", "pygments")
+    session.run("pytest", f"--typeguard-packages={package}", *session.posargs)
 
 
-@nox.session(python=["3.9", "3.8", "3.7"])
+@nox.session(python=python_versions)
 def xdoctest(session: Session) -> None:
     """Run examples with xdoctest."""
     args = session.posargs or ["all"]
-    session.run("poetry", "install", "--no-dev", external=True)
-    install_with_constraints(session, "xdoctest")
+    session.install(".")
+    session.install("xdoctest[colors]")
     session.run("python", "-m", "xdoctest", package, *args)
 
 
-@nox.session(python="3.8")
-def coverage(session: Session) -> None:
-    """Upload coverage data."""
-    install_with_constraints(session, "coverage[toml]", "codecov")
-    session.run("coverage", "xml", "--fail-under=0")
-    session.run("codecov", *session.posargs)
+@nox.session(name="docs-build", python="3.8")
+def docs_build(session: Session) -> None:
+    """Build the documentation."""
+    args = session.posargs or ["docs", "docs/_build"]
+    session.install(".")
+    session.install(
+        "sphinx", "sphinx-autodoc-typehints", "sphinx-copybutton", "pydata-sphinx-theme"
+    )
+
+    build_dir = Path("docs", "_build")
+    if build_dir.exists():
+        shutil.rmtree(build_dir)
+
+    session.run("sphinx-build", *args)
 
 
 @nox.session(python="3.8")
 def docs(session: Session) -> None:
-    """Build the documentation."""
-    session.run("poetry", "install", "--no-dev", external=True)
-    install_with_constraints(
-        session,
+    """Build and serve the documentation with live reloading on file changes."""
+    args = session.posargs or ["--open-browser", "docs", "docs/_build"]
+    session.install(".")
+    session.install(
         "sphinx",
+        "sphinx-autobuild",
         "sphinx-autodoc-typehints",
         "sphinx-copybutton",
         "pydata-sphinx-theme",
     )
-    session.run("sphinx-build", "docs", "docs/_build")
+
+    build_dir = Path("docs", "_build")
+    if build_dir.exists():
+        shutil.rmtree(build_dir)
+
+    session.run("sphinx-autobuild", *args)

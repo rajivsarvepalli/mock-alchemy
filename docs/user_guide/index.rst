@@ -41,7 +41,7 @@ UnifiedAlchemyMagicMock
 Asserts
 ~~~~~~~
 
-In the real-world, a SqlAlchemy session can be interacted with multiple times to query some data.
+In the real-world, a SQLAlchemy session can be interacted with multiple times to query some data.
 In those cases ``UnifiedAlchemyMagicMock`` can be used which combines various calls for easier assertions::
 
     >>> from mock_alchemy.mocking import UnifiedAlchemyMagicMock
@@ -177,7 +177,7 @@ inside :mod:`mock_alchemy.mocking`.
 Real-World Examples
 -------------------
 
-In these real-world examples, I will explain hypothetical or real scenarios in which I have used this library to mock SqlAlchemy in
+In these real-world examples, I will explain hypothetical or real scenarios in which I have used this library to mock SQLAlchemy in
 order to efficiently test my code. I will also explain several alternatives to this library to use for testing, and why specifically this
 library may be useful in the specific scenario.
 
@@ -319,11 +319,11 @@ Here is an example of how this might look. Assume the file detailed above is cal
 Assert Calls
 ^^^^^^^^^^^^
 
-Consider a scenario where we simply want to test whether certain SqlAlchemy statements have been called.
+Consider a scenario where we simply want to test whether certain SQLAlchemy statements have been called.
 This will not verify the actual data processing but will enable a degree of testing verification to ensure
 that either the correct branches are taken or that other functions call upon the session an appropriate amount
 of times. This ability can be combined with ``UnifiedAlchemyMagicMock`` to combine both data checking and the
-correct SqlAlchemy calls.
+correct SQLAlchemy calls.
 
 For example, consider the following function we want to test.
 
@@ -350,7 +350,7 @@ To test this function, we can use the
         ])
 
 With the combination of this example and the :ref:`previous example <data_stubbing>`, we can use ``UnifiedAlchemyMagicMock`` to assert calls
-to check branching in code and verify data values using a mock SqlAlchemy session
+to check branching in code and verify data values using a mock SQLAlchemy session
 
 Getting and Deleting
 ^^^^^^^^^^^^^^^^^^^^

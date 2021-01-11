@@ -4,18 +4,21 @@ from __future__ import annotations
 from unittest import mock
 
 import pytest
-from sqlalchemy import Column, Integer, String, or_
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import or_
+from sqlalchemy import String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.expression import column
 
 from mock_alchemy.comparison import ExpressionMatcher
-from mock_alchemy.mocking import (
-    AlchemyMagicMock,
-    UnifiedAlchemyMagicMock,
-    UnorderedCall,
-    UnorderedTuple,
-    sqlalchemy_call,
-)
+from mock_alchemy.mocking import AlchemyMagicMock
+from mock_alchemy.mocking import sqlalchemy_call
+from mock_alchemy.mocking import UnifiedAlchemyMagicMock
+from mock_alchemy.mocking import UnorderedCall
+from mock_alchemy.mocking import UnorderedTuple
+
+Base = declarative_base()
 
 
 def test_unorder_tuple() -> None:
@@ -29,16 +32,17 @@ def test_unorder_tuple() -> None:
 
 def test_unorder_call() -> None:
     """Tests call in which, in comparison order does not matter."""
-    Call = type(mock.call)
-    assert UnorderedCall(((1, 2, 3), {"hello": "world"})) == Call(
+    call = type(mock.call)
+    assert UnorderedCall(((1, 2, 3), {"hello": "world"})) == call(
         ((3, 2, 1), {"hello": "world"})
     )
 
 
 def test_alchemy_call() -> None:
-    """
-    Tests mock.call() being converted for wrapping in ExpressionMatcher
-    for SqlAlchemy call.
+    """Tests conversion of mock.call.
+
+    Tests ``mock.call()`` being converted for wrapping in ExpressionMatcher
+    for SQLAlchemy call.
     """
     args, kwargs = sqlalchemy_call(mock.call(5, foo="bar"))
     assert isinstance(args[0], ExpressionMatcher)
@@ -62,18 +66,17 @@ def test_alchemy_magic_mock() -> None:
 def test_unified_magic_mock() -> None:
     """Tests mock for SQLAlchemy that unifies session functions for simple asserts."""
     c = column("column")
-    """s = UnifiedAlchemyMagicMock()
+    s = UnifiedAlchemyMagicMock()
     ret = s.query(None).filter(c == "one").filter(c == "two").all()
     assert ret == []
     ret = s.query(None).filter(c == "three").filter(c == "four").all()
     assert ret == []
     assert 2 == s.filter.call_count
     _ = s.filter.assert_any_call(c == "one", c == "two")
-    _ = s.filter.assert_any_call(c == "three", c == "four")"""
-    Base = declarative_base()
+    _ = s.filter.assert_any_call(c == "three", c == "four")
 
     class SomeClass(Base):
-        """SqlAlchemy object for testing."""
+        """SQLAlchemy object for testing."""
 
         __tablename__ = "some_table"
         pk1 = Column(Integer, primary_key=True)
@@ -150,7 +153,7 @@ def test_unified_magic_mock() -> None:
     assert ret == 0
 
     class Model(Base):
-        """SqlAlchemy object for testing."""
+        """SQLAlchemy object for testing."""
 
         __tablename__ = "model_table"
         pk1 = Column(Integer, primary_key=True)

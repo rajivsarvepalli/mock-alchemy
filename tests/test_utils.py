@@ -1,17 +1,19 @@
 """Testing the module for utils in mock-alchemy."""
 import pytest
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import String
 from sqlalchemy.ext.declarative import declarative_base
 
-from mock_alchemy.utils import (
-    build_identity_map,
-    copy_and_update,
-    get_item_attr,
-    indexof,
-    match_type,
-    raiser,
-    setattr_tmp,
-)
+from mock_alchemy.utils import build_identity_map
+from mock_alchemy.utils import copy_and_update
+from mock_alchemy.utils import get_item_attr
+from mock_alchemy.utils import indexof
+from mock_alchemy.utils import match_type
+from mock_alchemy.utils import raiser
+from mock_alchemy.utils import setattr_tmp
+
+Base = declarative_base()
 
 
 def test_match_type() -> None:
@@ -51,21 +53,23 @@ def test_setattr_tmp() -> None:
         assert Foo.foo == "bar"
     Foo.foo = None
     with setattr_tmp(Foo, "foo", "bar"):
-        assert Foo.foo == None
+        assert Foo.foo is None
 
 
 def test_raiser() -> None:
     """Tests utility for raising exceptions."""
-    a = lambda x: not x and raiser(ValueError, "error message")
-    _ = a(True)
+
+    def test_func(x: bool) -> None:
+        not x and raiser(ValueError, "error message")
+
+    _ = test_func(True)
     with pytest.raises(ValueError) as excinfo:
-        _ = a(False)
+        _ = test_func(False)
         assert "error message" in str(excinfo.value)
 
 
 def test_idmap() -> None:
     """Tests building an idmap."""
-    Base = declarative_base()
 
     class SomeClass(Base):
         __tablename__ = "some_table"
@@ -73,7 +77,7 @@ def test_idmap() -> None:
         pk2 = Column(Integer, primary_key=True)
         name = Column(String(50))
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return str(self.pk1)
 
     expected_idmap = {(1, 2): 1}

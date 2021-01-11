@@ -10,7 +10,6 @@ API Reference
    mock_alchemy.mocking
    mock_alchemy.comparison
    mock_alchemy.utils
-   mock_alchemy.compat
    mock_alchemy.unittests
 
 

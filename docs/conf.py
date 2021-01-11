@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Sphinx configuration."""
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
 
 from datetime import datetime
 
@@ -23,6 +25,12 @@ html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "github_url": "https://github.com/rajivsarvepalli/mock-alchemy",
     "show_prev_next": False,
+    "external_links": [
+        {
+            "name": "Changelog",
+            "url": "https://github.com/rajivsarvepalli/mock-alchemy/releases",
+        },
+    ],
 }
 
 html_css_files = [

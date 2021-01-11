@@ -1,28 +1,41 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, unicode_literals
+"""A module for basic mocking of SQLAlchemy sessions and calls."""
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
 
 from functools import partial
-from itertools import chain, takewhile
+from itertools import chain
+from itertools import takewhile
+from typing import Any
+from typing import Callable
+from typing import Dict
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import overload
+from typing import Sequence
+from typing import Set
 from unittest import mock
 
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+from sqlalchemy.orm.exc import MultipleResultsFound
+from sqlalchemy.orm.exc import NoResultFound
 
 from .comparison import ExpressionMatcher
-from .utils import (
-    build_identity_map,
-    copy_and_update,
-    get_item_attr,
-    indexof,
-    raiser,
-    setattr_tmp,
-)
+from .utils import build_identity_map
+from .utils import copy_and_update
+from .utils import get_item_attr
+from .utils import indexof
+from .utils import raiser
+from .utils import setattr_tmp
 
 Call = type(mock.call)
 
 
 class UnorderedTuple(tuple):
-    """
-    Same as tuple except in comparison order does not matter
+    """Same as tuple except in comparison order does not matter.
+
+    A tuple in which order does not matter for equality. It compares
+    by remove elements from the other tuple.
 
     For example::
 
@@ -30,7 +43,8 @@ class UnorderedTuple(tuple):
         True
     """
 
-    def __eq__(self, other):
+    def __eq__(self, other: tuple) -> bool:
+        """Compares another tuple for equality."""
         if len(self) != len(other):
             return False
 
@@ -45,29 +59,47 @@ class UnorderedTuple(tuple):
 
 
 class UnorderedCall(Call):
-    """
-    Same as Call except in comparison order of parameters does not matter
+    """Same as Call except in comparison order of parameters does not matter.
+
+    A ``mock.Call`` subclass that ensures that eqaulity does not depend on order.
+    This isued to check if SQLAlchemy calls match up regardless of order. For example,
+    this is useful in the case of filtering when ``.filter(y == 4).filter(y == 2)``
+    is the same as ``.filter(y == 2).filter(y == 4)``.
 
     For example::
 
-        >>> UnorderedCall(((1, 2, 3), {'hello': 'world'})) == Call(((3, 2, 1), {'hello': 'world'}))
+        >>> a = ((1, 2, 3), {'hello': 'world'})
+        >>> b = ((3, 2, 1), {'hello': 'world'})
+        >>> UnorderedCall(a) == Call(b)
         True
     """
 
-    def __eq__(self, other):
+    def __eq__(self, other: Call) -> bool:
+        """Compares another call for equality."""
         _other = list(other)
         _other[-2] = UnorderedTuple(other[-2])
         other = Call(
             tuple(_other),
-            **{k.replace("_mock_", ""): v for k, v in vars(other).items()}
+            **{k.replace("_mock_", ""): v for k, v in vars(other).items()},
         )
 
         return super(UnorderedCall, self).__eq__(other)
 
 
-def sqlalchemy_call(call, with_name=False, base_call=Call):
-    """
-    Convert ``mock.call()`` into call with all parameters wrapped with ``ExpressionMatcher``
+def sqlalchemy_call(call: Call, with_name: bool = False, base_call: Any = Call) -> Any:
+    """Convert ``mock.call()`` into call.
+
+    Convert ``mock.call()`` into call with all parameters
+    wrapped with ``ExpressionMatcher``. This is useful for comparing
+    SQLAlchemy statements for equality.
+
+    Args:
+        call: The call to convert.
+        with_name: Whether to convert the name of the call.
+        base_call: The type of call to convert into.
+
+    Returns:
+        Returns the converted call of the type ``base_call``.
 
     For example::
 
@@ -94,8 +126,9 @@ def sqlalchemy_call(call, with_name=False, base_call=Call):
 
 
 class AlchemyMagicMock(mock.MagicMock):
-    """
-    MagicMock for SQLAlchemy which can compare alchemys expressions in assertions
+    """Compares SQLAlchemy expressions for simple asserts.
+
+    MagicMock for SQLAlchemy which can compare alchemys expressions in assertions.
 
     For example::
 
@@ -116,24 +149,48 @@ class AlchemyMagicMock(mock.MagicMock):
         Traceback (most recent call last):
         ...
         AssertionError: expected call not found.
-        Expected: filter(BinaryExpression(sql='"column" = :column_1', params={'column_1': 10}))
-        Actual: filter(BinaryExpression(sql='"column" = :column_1', params={'column_1': 5}))
+        Expected: filter(BinaryExpression(sql='"column" = :column_1', \
+        params={'column_1': 10}))
+        Actual: filter(BinaryExpression(sql='"column" = :column_1', \
+        params={'column_1': 5}))
     """
 
-    def __init__(self, *args, **kwargs):
+    @overload
+    def __init__(
+        self,
+        spec: Optional[Any] = ...,
+        side_effect: Optional[Any] = ...,
+        return_value: Any = ...,
+        wraps: Optional[Any] = ...,
+        name: Optional[Any] = ...,
+        spec_set: Optional[Any] = ...,
+        parent: Optional[Any] = ...,
+        _spec_state: Optional[Any] = ...,
+        _new_name: Any = ...,
+        _new_parent: Optional[Any] = ...,
+        **kwargs: Any,
+    ) -> None:
+        """Creates AlchemyMagicMock that can be used as limited SQLAlchemy session."""
+        ...  # pragma: no cover
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Creates AlchemyMagicMock that can be used as limited SQLAlchemy session."""
         kwargs.setdefault("__name__", "Session")
         super(AlchemyMagicMock, self).__init__(*args, **kwargs)
 
-    def _format_mock_call_signature(self, args, kwargs):
+    def _format_mock_call_signature(self, args: Any, kwargs: Any) -> str:
+        """Formats the mock call into a string."""
         name = self._mock_name or "mock"
         args, kwargs = sqlalchemy_call(mock.call(*args, **kwargs))
         return mock._format_call_signature(name, args, kwargs)
 
-    def assert_called_with(self, *args, **kwargs):
+    def assert_called_with(self, *args: Any, **kwargs: Any) -> None:
+        """Assert for a specific call to have happened."""
         args, kwargs = sqlalchemy_call(mock.call(*args, **kwargs))
         return super(AlchemyMagicMock, self).assert_called_with(*args, **kwargs)
 
-    def assert_any_call(self, *args, **kwargs):
+    def assert_any_call(self, *args: Any, **kwargs: Any) -> None:
+        """Assert for a specific call to have happened."""
         args, kwargs = sqlalchemy_call(mock.call(*args, **kwargs))
         with setattr_tmp(
             self,
@@ -142,7 +199,8 @@ class AlchemyMagicMock(mock.MagicMock):
         ):
             return super(AlchemyMagicMock, self).assert_any_call(*args, **kwargs)
 
-    def assert_has_calls(self, calls, any_order=False):
+    def assert_has_calls(self, calls: List[Call], any_order: bool = False) -> None:
+        """Assert for a list of calls to have happened."""
         calls = [sqlalchemy_call(i) for i in calls]
         with setattr_tmp(
             self,
@@ -153,7 +211,8 @@ class AlchemyMagicMock(mock.MagicMock):
 
 
 class UnifiedAlchemyMagicMock(AlchemyMagicMock):
-    """
+    """A MagicMock that combines SQLALchemy to mock a session.
+
     MagicMock which unifies common SQLALchemy session functions for easier assertions.
 
     For example::
@@ -170,6 +229,20 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         2
         >>> s.filter.assert_any_call(c == 'one', c == 'two')
         >>> s.filter.assert_any_call(c == 'three', c == 'four')
+
+    Attributes:
+        boundary: A dict of SQLAlchemy functions or statements that get
+            or retreive data from calls. This dictionary has values
+            that are the callable functions to process the function calls.
+        unify: A dict of SQLAlchemy functions or statements that are to
+            unifying expressions together. This dictionary has values
+            that are the callable functions to process the function calls. Note
+            that across query calls data and, as such, these calls are not unified.
+            Check out the examples for this class for more detail about this
+            limitation.
+        mutate: A set of operations that mutate data. The currently supported
+            operations include ``.delete()``, ``.add()``, and ``.add_all()``.
+            More operations are planned and this is a future area of work.
 
     In addition, mock data be specified to stub real DB interactions.
     Result-sets are specified per filtering criteria so that unique data
@@ -309,8 +382,16 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         ...     ),
         ...     (
         ...         [mock.call.query('foo'),
-        ...          mock.call.filter(c == 'one', c == 'two', c == 'three')],
-        ...         [SomeClass(pk1=1, pk2=1), SomeClass(pk1=2, pk2=2), SomeClass(pk1=3, pk2=3)]
+        ...          mock.call.filter(
+        ...             c == 'one',
+        ...             c == 'two',
+        ...             c == 'three',
+        ...         )],
+        ...         [
+        ...             SomeClass(pk1=1, pk2=1),
+        ...             SomeClass(pk1=2, pk2=2),
+        ...             SomeClass(pk1=3, pk2=3),
+        ...         ]
         ...     ),
         ... ])
 
@@ -324,7 +405,8 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         []
         >>> s.query('foo').filter(c == 'one').filter(c == 'two').all()
         [1, 2]
-        >>> s.query('foo').filter(c == 'one').filter(c == 'two').filter(c == 'three').all()
+        >>> a = s.query('foo').filter(c == 'one').filter(c == 'two')
+        >>> a.filter(c == 'three').all()
         [1, 2, 3]
         >>> s = UnifiedAlchemyMagicMock()
         >>> s.add(SomeClass(pk1=1, pk2=1))
@@ -343,10 +425,11 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         0
 
     Also note that only within same query functions are unified.
-    After ``.all()`` is called or query is iterated over, future queries are not unified.
+    After ``.all()`` is called or query is iterated over, future queries
+    are not unified.
     """
 
-    boundary = {
+    boundary: Dict[str, Callable] = {
         "all": lambda x: x,
         "__iter__": lambda x: iter(x),
         "count": lambda x: len(x),
@@ -370,7 +453,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         ),
         "get": lambda x, idmap: get_item_attr(build_identity_map(x), idmap),
     }
-    unify = {
+    unify: Dict[str, Optional[UnorderedCall]] = {
         "query": None,
         "add_columns": None,
         "join": None,
@@ -383,9 +466,28 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         "distinct": None,
     }
 
-    mutate = {"add", "add_all", "delete"}
+    mutate: Set[str] = {"add", "add_all", "delete"}
 
-    def __init__(self, *args, **kwargs):
+    @overload
+    def __init__(
+        self,
+        spec: Optional[Any] = ...,
+        side_effect: Optional[Any] = ...,
+        return_value: Any = ...,
+        wraps: Optional[Any] = ...,
+        name: Optional[Any] = ...,
+        spec_set: Optional[Any] = ...,
+        parent: Optional[Any] = ...,
+        _spec_state: Optional[Any] = ...,
+        _new_name: Any = ...,
+        _new_parent: Optional[Any] = ...,
+        **kwargs: Any,
+    ) -> None:
+        """Creates an UnifiedAlchemyMagicMock to mock a SQLAlchemy session."""
+        ...  # pragma: no cover
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Creates an UnifiedAlchemyMagicMock to mock a SQLAlchemy session."""
         kwargs["_mock_default"] = kwargs.pop("default", [])
         kwargs["_mock_data"] = kwargs.pop("data", None)
 
@@ -418,10 +520,12 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
         super(UnifiedAlchemyMagicMock, self).__init__(*args, **kwargs)
 
-    def _get_previous_calls(self, calls):
+    def _get_previous_calls(self, calls: Sequence[Call]) -> Iterator:
+        """Gets the previous calls on the same line."""
         return iter(takewhile(lambda i: i[0] not in self.boundary, reversed(calls)))
 
-    def _get_previous_call(self, name, calls):
+    def _get_previous_call(self, name: str, calls: Sequence[Call]) -> Optional[Call]:
+        """Gets the previous call right before the current call."""
         # get all previous session calls within same session query
         previous_calls = self._get_previous_calls(calls)
 
@@ -430,7 +534,20 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
         return next(iter(filter(lambda i: i[0] == name, previous_calls)), None)
 
-    def _unify(self, *args, **kwargs):
+    @overload
+    def _unify(
+        self,
+        value: Any = ...,
+        name: Optional[Any] = ...,
+        parent: Optional[Any] = ...,
+        two: bool = ...,
+        from_kall: bool = ...,
+    ) -> None:
+        """Unify the SQLAlchemy expressions."""
+        ...  # pragma: no cover
+
+    def _unify(self, *args, **kwargs) -> Any:
+        """Unify the SQLAlchemy expressions."""
         _mock_name = kwargs.pop("_mock_name")
         submock = getattr(self, _mock_name)
 
@@ -441,7 +558,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             return submock.return_value
 
         # remove immediate call from both filter mock as well as the parent mock object
-        # as it was already registered in self.__call__ before this side-effect is called
+        # as it already registered in self.__call__ before this side-effect is call
         submock.call_count -= 1
         submock.call_args_list.pop()
         submock.mock_calls.pop()
@@ -467,7 +584,8 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
         return submock.return_value
 
-    def _get_data(self, *args, **kwargs):
+    def _get_data(self, *args: Any, **kwargs: Any) -> Any:
+        """Get the data for the SQLAlchemy expression."""
         _mock_name = kwargs.pop("_mock_name")
         _mock_default = self._mock_default
         _mock_data = self._mock_data
@@ -510,7 +628,8 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
         return self.boundary[_mock_name](_mock_default, *args, **kwargs)
 
-    def _mutate_data(self, *args, **kwargs):
+    def _mutate_data(self, *args: Any, **kwargs: Any) -> Optional[int]:
+        """Alter the data for the SQLAlchemy expression."""
         _mock_name = kwargs.get("_mock_name")
         _mock_data = self._mock_data = self._mock_data or []
         if _mock_name == "add":
