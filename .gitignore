@@ -7,7 +7,7 @@
 # Packages
 *.egg
 *.egg-info
-dist
+/dist/
 build
 eggs
 parts
@@ -23,15 +23,21 @@ lib64
 pip-log.txt
 
 # Unit test / coverage reports
-.coverage
+/.coverage
 .tox
 nosetests.xml
 htmlcov
 .cache
 .pytest_cache
-.mypy_cache
+.mypy_cache/
 *.xml
-*.nox
+/.nox/
+/.python-version
+/.pytype/
+
+
+/src/*.egg-info/
+__pycache__/
 
 # Translations
 *.mo
@@ -46,8 +52,7 @@ output/*.html
 output/*/index.html
 
 # Sphinx
-docs/_build
-
+/docs/_build/
 
 # IDEs
 /.idea

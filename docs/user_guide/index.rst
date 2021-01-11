@@ -12,6 +12,12 @@ You can install ``mock-alchemy`` using pip::
 
     $ pip install mock-alchemy
 
+If you want to use this package on Python 2.7 or Python 3.6, then install ``mock-alchemy`` using::
+
+    $ pip install "mock-alchemy>=0.1.0,<0.2.0"
+
+Pip should auto-detect the correct version but this ensures the correct version is downloaded for your needs.
+
 Quick Examples
 --------------
 

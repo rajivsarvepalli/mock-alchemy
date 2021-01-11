@@ -14,9 +14,10 @@ classifiers=[
     "Natural Language :: English",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Development Status :: 2 - Pre-Alpha",
 ]
 
@@ -51,6 +52,11 @@ pydata-sphinx-theme = "^0.4.1"
 pep8-naming = "^0.11.1"
 Pygments = "^2.7.3"
 reorder-python-imports = "^2.3.6"
+flake8-rst-docstrings = "^0.0.14"
+pre-commit = "^2.9.3"
+pre-commit-hooks = "^3.4.0"
+sphinx-autobuild = "^2020.9.1"
+sphinx-autodoc-typehints = "^1.11.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
