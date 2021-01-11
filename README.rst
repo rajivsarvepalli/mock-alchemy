@@ -28,6 +28,8 @@ Full documentation is available at `http://mock-alchemy.rtfd.io/ <http://mock-al
 On the documentation, you should be able to select a version of your choice in order to view documentation
 of an older version if need be.
 This README includes some basic examples, but more detailed examples are included in the documentation, especially in the `user guide <https://mock-alchemy.readthedocs.io/en/latest/user_guide/>`__.
+If you are looking for an API reference, it is also available on the `documentation <https://mock-alchemy.readthedocs.io/en/latest/api_reference/mock_alchemy.mocking.html>`__.
+
 
 Credit
 ----------
