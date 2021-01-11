@@ -6,7 +6,7 @@ Contributor Guide
 This project welcomes contributions and suggestions. Feel free to suggest any changes, correct any bugs,
 or add new features. The easiest way is simply through GitHub itself with the issues tab. These suggestions or bugs
 can be reported and then addressed. If you want to contribute, you can simply submit a pull-request or make your own package
-of this software through forking. Pull-requests are the easiest manner in which to contribute along with appropriate issue labels
+of this software through forking. Pull-requests are the easiest manner in which to contribute along with tagging appropriate issues
 which enable a quicker release with release drafter.
 
 

@@ -21,6 +21,16 @@ SQLAlchemy mock helpers.
 * Free software: MIT license
 * GitHub: https://github.com/rajivsarvepalli/mock-alchemy
 
+
+Why?
+----
+
+SQLAlchemy is awesome. Unittests are great.
+Accessing DB during tests - not so much.
+This library provides an easy way to mock SQLAlchemy's session
+in unittests while preserving the ability to do sane asserts.
+
+
 Documentation
 -------------
 
@@ -28,6 +38,22 @@ Full documentation is available at `http://mock-alchemy.rtfd.io/ <http://mock-al
 On the documentation, you should be able to select a version of your choice in order to view documentation
 of an older version if need be.
 This README includes some basic examples, but more detailed examples are included in the documentation, especially in the `user guide <https://mock-alchemy.readthedocs.io/en/latest/user_guide/>`__.
+If you are looking for an API reference, it is also available on the `documentation <https://mock-alchemy.readthedocs.io/en/latest/api_reference/mock_alchemy.mocking.html>`__.
+
+
+Installing
+----------
+
+You can install ``mock-alchemy`` using pip::
+
+    $ pip install mock-alchemy
+
+If you want to use this package on Python 2.7 or Python 3.6, then install ``mock-alchemy`` using::
+
+    $ pip install "mock-alchemy>=0.1.0,<0.2.0"
+
+Pip should auto-detect the correct version but this ensures the correct version is downloaded for your needs.
+
 
 Versioning
 ----------
@@ -49,26 +75,10 @@ in the original library. It appeared that the ``alchemy-mock`` project was no lo
 for deleting, I created my own version of the library. Full credit goes to the original creators for starting and building this project. You can find the
 original package on `PyPi <https://pypi.org/project/alchemy-mock/>`__ and `Github <https://github.com/miki725/alchemy-mock>`__.
 
-Installing
-----------
 
-You can install ``mock-alchemy`` using pip::
+Using
+-----
 
-    $ pip install mock-alchemy
-
-If you want to use this package on Python 2.7 or Python 3.6, then install ``mock-alchemy`` using::
-
-    $ pip install "mock-alchemy>=0.1.0,<0.2.0"
-
-Pip should auto-detect the correct version but this ensures the correct version is downloaded for your needs.
-
-Why?
-----
-
-SQLAlchemy is awesome. Unittests are great.
-Accessing DB during tests - not so much.
-This library provides easy way to mock SQLAlchemy's session
-in unittests while preserving ability to do sane asserts.
 Normally SQLAlchemy's expressions cannot be easily compared
 as comparison on binary expression produces yet another binary expression::
 
@@ -80,8 +90,6 @@ But they can be compared with this library::
     >>> ExpressionMatcher(Model.foo == 5) == (Model.bar == 5)
     False
 
-Using
------
 
 ``ExpressionMatcher`` can be directly used::
 
@@ -177,7 +185,7 @@ accessed with ``all`` can also be deleted. For example::
     []
 
 Note the limitation for dynamic sessions remains the same. Additionally, the delete will not be propagated across
-queries (only unified in the exact same query). As in if there are multiple queries in which the 'same'
+queries (only unified in the exact same query). As in, if there are multiple queries in which the 'same'
 object is present, this library considers them separate objects. For example::
 
     >>> s = UnifiedAlchemyMagicMock(data=[
@@ -211,3 +219,29 @@ object is present, this library considers them separate objects. For example::
     [1, 2, 3]
 
 The item referred to by :code:`c == 'three'` is still present in the filtered query despite the individual item being deleted.
+
+
+Contributing
+------------
+
+Contributions are welcome.
+To learn more, see the `Contributor Guide`_.
+
+
+License
+-------
+
+Distributed under the terms of the MIT_ license,
+*mock-alchemy* is free and open source software.
+
+
+Issues
+------
+
+If you encounter any issues or problems,
+please `file an issue`_ along with a detailed description.
+
+.. _MIT: http://opensource.org/licenses/MIT
+
+.. _Contributor Guide: https://mock-alchemy.readthedocs.io/en/latest/contributor_guide/
+.. _file an issue: https://github.com/rajivsarvepalli/mock-alchemy/issues

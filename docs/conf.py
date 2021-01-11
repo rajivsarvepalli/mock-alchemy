@@ -45,6 +45,9 @@ html_css_files = [
     "css/pandas.css",
 ]
 
+# credit to https://www.freepik.com/
+html_favicon = "_static/alchemy.svg"
+
 
 def linkcode_resolve(domain: str, info: Dict) -> str:
     """Determine the URL corresponding to Python object."""

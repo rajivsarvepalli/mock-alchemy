@@ -35,8 +35,8 @@ class AlchemyUnittestMixin(object):
         Traceback (most recent call last):
         ...
         AssertionError: BinaryExpression(sql='"column" = :column_1', \
-        params={'column_1': 5}) != BinaryExpression(sql='"column" = :column_1', \
-        params={'column_1': 10})
+params={'column_1': 5}) != BinaryExpression(sql='"column" = :column_1', \
+params={'column_1': 10})
     """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
