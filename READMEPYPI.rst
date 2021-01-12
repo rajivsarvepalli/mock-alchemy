@@ -1,21 +1,31 @@
-.. raw:: html
+mock-alchemy
+============
 
-    <p align="center"><a href="https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/docs/_static/alchemy.svg"><img src="https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/docs/_static/alchemy.svg" alt="alchemy bottle icon" height="60"/></a></p>
-    <h1 align="center">mock-alchemy</h1>
-    <p align="center">Simple and intuitive SQLAlchemy mock helpers.</p>
+|alchemy bottle icon|
 
-    <p align="center">
-        <a href="https://mock-alchemy.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/mock-alchemy/badge/?version=latest"/></a>
-        <a href="https://pypi.org/project/mock-alchemy/"><img src="https://img.shields.io/pypi/v/mock-alchemy.svg"/></a>
-        <a href="https://pypi.org/project/mock-alchemy/"><img src="https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/imgs/python_versions.svg"/></a>
-        <a href="https://github.com/rajivsarvepalli/mock-alchemy/actions?workflow=Tests"><img src="https://github.com/rajivsarvepalli/mock-alchemy/workflows/Tests/badge.svg"/></a>
-        <a href="https://codecov.io/gh/rajivsarvepalli/mock-alchemy"><img src="https://codecov.io/gh/rajivsarvepalli/mock-alchemy/branch/master/graph/badge.svg"/></a>
+Simple and intuitive SQLAlchemy mock helpers.
 
-    </p><br/><br/>
+|image1| |image2| |image3| |image4| |image5|
+
+|
+
+.. |alchemy bottle icon| image:: https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/docs/_static/alchemy.svg
+   :height: 60px
+   :target: https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/docs/_static/alchemy.svg
+.. |image1| image:: https://readthedocs.org/projects/mock-alchemy/badge/?version=latest
+   :target: https://mock-alchemy.readthedocs.io/en/latest/?badge=latest
+.. |image2| image:: https://img.shields.io/pypi/v/mock-alchemy.svg
+   :target: https://pypi.org/project/mock-alchemy/
+.. |image3| image:: https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/imgs/python_versions.svg
+   :target: https://pypi.org/project/mock-alchemy/
+.. |image4| image:: https://github.com/rajivsarvepalli/mock-alchemy/workflows/Tests/badge.svg
+   :target: https://github.com/rajivsarvepalli/mock-alchemy/actions?workflow=Tests
+.. |image5| image:: https://codecov.io/gh/rajivsarvepalli/mock-alchemy/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/rajivsarvepalli/mock-alchemy
 
 
 🤖 Mocking SQLAlchemy
-------------------
+--------------------------
 
 SQLAlchemy is awesome. Unittests are great.
 Accessing DB during tests - not so much.
@@ -37,7 +47,7 @@ If you are looking for an API reference, it is also available on the `documentat
 
 
 📦 Installing
-----------
+---------------------
 
 You can install ``mock-alchemy`` using pip::
 
@@ -50,8 +60,8 @@ If you want to use this package on Python 2.7 or Python 3.6, then install ``mock
 Pip should auto-detect the correct version but this ensures the correct version is downloaded for your needs.
 
 
-🏷️ Versioning
---------------
+🔖 Versioning
+--------------------
 
 There are several different versions of ``mock-alchemy`` available depending on your needs. The versions ``0.1.x`` are available for use on
 Python 2.7, Python 3.6+. The newer versions serve users who are on Python 3.7+. For people interested in contributing, if you want to work
@@ -63,7 +73,7 @@ the readthedocs version system (click on the drop-down menu on the bottom right 
 
 
 📤 Credit
-----------
+------------------
 
 The original library (``alchemy-mock``) was created by Miroslav Shubernetskiy and Serkan Hoscai. This is a forked version due to a lack of updates
 in the original library. It appeared that the ``alchemy-mock`` project was no longer supported. Therefore, since I desired to add some basic support
@@ -72,7 +82,7 @@ original package on `PyPi <https://pypi.org/project/alchemy-mock/>`__ and `Githu
 
 
 ⚙ Using
------
+--------------
 
 Normally SQLAlchemy's expressions cannot be easily compared
 as comparison on binary expression produces yet another binary expression::
@@ -217,21 +227,21 @@ The item referred to by :code:`c == 'three'` is still present in the filtered qu
 
 
 👷 Contributing
-------------
+---------------------
 
 Contributions are welcome.
 To learn more, see the `Contributor Guide`_.
 
 
 📕 License
--------
+----------------
 
 Distributed under the terms of the MIT_ license,
 *mock-alchemy* is free and open source software.
 
 
 💥 Issues
-------
+-----------------
 
 If you encounter any issues or problems,
 please `file an issue`_ along with a detailed description.
