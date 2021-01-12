@@ -1,38 +1,33 @@
-===============
-Mock SQLAlchemy
-===============
-.. image:: https://readthedocs.org/projects/mock-alchemy/badge/?version=latest
-    :target: https://mock-alchemy.readthedocs.io/en/latest/?badge=latest
+.. raw:: html
 
-.. image:: https://img.shields.io/pypi/v/mock-alchemy.svg
-    :target: https://pypi.org/project/mock-alchemy/
+    <p align="center"><a href="https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/docs/_static/alchemy.svg"><img src="https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/docs/_static/alchemy.svg" alt="Gray shape shifter" height="60"/></a></p>
+    <h1 align="center">mock-alchemy</h1>
+    <p align="center">Simple and intuitive SQLAlchemy mock helpers.</p>
 
-.. image:: https://img.shields.io/pypi/pyversions/mock-alchemy.svg
-    :target: https://pypi.org/project/mock-alchemy/
+    <p align="center">
+        <a href="https://mock-alchemy.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/mock-alchemy/badge/?version=latest"/></a>
+        <a href="https://pypi.org/project/mock-alchemy/"><img src="https://img.shields.io/pypi/v/mock-alchemy.svg"/></a>
+        <a href="https://pypi.org/project/mock-alchemy/"><img src="https://img.shields.io/pypi/pyversions/mock-alchemy.svg"/></a>
+        <a href="https://github.com/rajivsarvepalli/mock-alchemy/actions?workflow=Tests"><img src="https://github.com/rajivsarvepalli/mock-alchemy/workflows/Tests/badge.svg"/></a>
+        <a href="https://codecov.io/gh/rajivsarvepalli/mock-alchemy"><img src="https://codecov.io/gh/rajivsarvepalli/mock-alchemy/branch/master/graph/badge.svg"/></a>
 
-.. image:: https://github.com/rajivsarvepalli/mock-alchemy/workflows/Tests/badge.svg
-    :target: https://github.com/rajivsarvepalli/mock-alchemy/actions?workflow=Tests
-
-.. image:: https://codecov.io/gh/rajivsarvepalli/mock-alchemy/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/rajivsarvepalli/mock-alchemy
-
-SQLAlchemy mock helpers.
-
-* Free software: MIT license
-* GitHub: https://github.com/rajivsarvepalli/mock-alchemy
+    </p><br/><br/>
 
 
-Why?
-----
+🤖 Mocking SQLAlchemy
+------------------
 
 SQLAlchemy is awesome. Unittests are great.
 Accessing DB during tests - not so much.
 This library provides an easy way to mock SQLAlchemy's session
 in unittests while preserving the ability to do sane asserts.
 
+* Free software: MIT license
+* GitHub: https://github.com/rajivsarvepalli/mock-alchemy
 
-Documentation
--------------
+
+📚 Documentation
+---------------------
 
 Full documentation is available at `http://mock-alchemy.rtfd.io/ <http://mock-alchemy.rtfd.io/>`__.
 On the documentation, you should be able to select a version of your choice in order to view documentation
@@ -41,7 +36,7 @@ This README includes some basic examples, but more detailed examples are include
 If you are looking for an API reference, it is also available on the `documentation <https://mock-alchemy.readthedocs.io/en/latest/api_reference/mock_alchemy.mocking.html>`__.
 
 
-Installing
+📦 Installing
 ----------
 
 You can install ``mock-alchemy`` using pip::
@@ -55,7 +50,7 @@ If you want to use this package on Python 2.7 or Python 3.6, then install ``mock
 Pip should auto-detect the correct version but this ensures the correct version is downloaded for your needs.
 
 
-Versioning
+🏷 Versioning
 ----------
 
 There are several different versions of ``mock-alchemy`` available depending on your needs. The versions ``0.1.x`` are available for use on
@@ -67,7 +62,7 @@ job at illustrating both the past and the features of the present version at lea
 the readthedocs version system (click on the drop-down menu on the bottom right of the screen on the documentation or go to the `project page <https://readthedocs.org/projects/mock-alchemy/>`__).
 
 
-Credit
+📤 Credit
 ----------
 
 The original library (``alchemy-mock``) was created by Miroslav Shubernetskiy and Serkan Hoscai. This is a forked version due to a lack of updates
@@ -76,7 +71,7 @@ for deleting, I created my own version of the library. Full credit goes to the o
 original package on `PyPi <https://pypi.org/project/alchemy-mock/>`__ and `Github <https://github.com/miki725/alchemy-mock>`__.
 
 
-Using
+⚙ Using
 -----
 
 Normally SQLAlchemy's expressions cannot be easily compared
@@ -221,21 +216,21 @@ object is present, this library considers them separate objects. For example::
 The item referred to by :code:`c == 'three'` is still present in the filtered query despite the individual item being deleted.
 
 
-Contributing
+👷 Contributing
 ------------
 
 Contributions are welcome.
 To learn more, see the `Contributor Guide`_.
 
 
-License
+📕 License
 -------
 
 Distributed under the terms of the MIT_ license,
 *mock-alchemy* is free and open source software.
 
 
-Issues
+💥 Issues
 ------
 
 If you encounter any issues or problems,
