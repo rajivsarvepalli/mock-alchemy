@@ -1,6 +1,6 @@
 .. raw:: html
 
-    <p align="center"><a href="https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/docs/_static/alchemy.svg"><img src="https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/docs/_static/alchemy.svg" alt="Gray shape shifter" height="60"/></a></p>
+    <p align="center"><a href="https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/docs/_static/alchemy.svg"><img src="https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/docs/_static/alchemy.svg" alt="alchemy bottle icon" height="60"/></a></p>
     <h1 align="center">mock-alchemy</h1>
     <p align="center">Simple and intuitive SQLAlchemy mock helpers.</p>
 
