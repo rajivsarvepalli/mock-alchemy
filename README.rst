@@ -23,7 +23,7 @@ This library provides an easy way to mock SQLAlchemy's session
 in unittests while preserving the ability to do sane asserts.
 
 * Free software: MIT license
-* GitHub: https://github.com/rajivsarvepalli/mock-alchemy
+* PyPI: https://pypi.org/project/mock-alchemy/
 
 
 📚 Documentation
