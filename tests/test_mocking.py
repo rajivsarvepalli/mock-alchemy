@@ -159,6 +159,16 @@ def test_unified_magic_mock() -> None:
         pk1 = Column(Integer, primary_key=True)
         name = Column(String)
 
+        def __eq__(self, other: Model) -> bool:
+            """Object equality checker."""
+            if isinstance(other, Model):
+                return self.pk1 == other.pk1 and self.name == other.name
+            return NotImplemented
+
+        def __repr__(self) -> str:
+            """Get strin of object."""
+            return str(self.pk1)
+
     s = UnifiedAlchemyMagicMock()
     s.add_all([SomeClass(pk1=2, pk2=2)])
     s.add_all([Model(pk1=5, name="test")])
@@ -168,3 +178,61 @@ def test_unified_magic_mock() -> None:
     assert ret == 0
     s = UnifiedAlchemyMagicMock()
     assert s.all() == []
+    s = UnifiedAlchemyMagicMock(
+        data=[
+            (
+                [mock.call.query(Model), mock.call.filter(Model.pk1 < 1)],
+                [Model(pk1=1, name="test1")],
+            ),
+            (
+                [mock.call.query(Model)],
+                [Model(pk1=2, name="test2")],
+            ),
+        ]
+    )
+    ret = s.query(Model).filter(Model.pk1 < 1).all()
+    assert ret == [Model(pk1=1, name="test1")]
+    ret = s.query(Model).filter(Model.pk1 < 1).delete()
+    assert ret == 1
+    ret = s.query(Model).all()
+    assert ret == [Model(pk1=2, name="test2")]
+    ret = s.query(Model).filter(Model.pk1 < 1).all()
+    assert ret == []
+    # test without equals
+
+    class Model2(Base):
+        """SQLAlchemy object for testing."""
+
+        __tablename__ = "model_table_2"
+        pk1 = Column(Integer, primary_key=True)
+        name = Column(String)
+
+        def __repr__(self) -> str:
+            """Get strin of object."""
+            return str(self.pk1)
+
+    s = UnifiedAlchemyMagicMock(
+        data=[
+            (
+                [mock.call.query(Model2), mock.call.filter(Model2.pk1 < 1)],
+                [Model2(pk1=1, name="test1")],
+            ),
+            (
+                [mock.call.query(Model2)],
+                [Model2(pk1=2, name="test2")],
+            ),
+        ]
+    )
+    ret = s.query(Model2).filter(Model2.pk1 < 1).all()
+    ret = [str(r) for r in ret]
+    assert ret == ["1"]
+    ret = s.query(Model2).filter(Model2.pk1 < 1).delete()
+    assert ret == 1
+    ret = s.query(Model2).all()
+    ret = [str(r) for r in ret]
+    assert ret == ["2"]
+    ret = s.query(Model2).filter(Model2.pk1 < 1).all()
+    assert ret == []
+    s = UnifiedAlchemyMagicMock()
+    ret = s.query(Model).delete()
+    assert ret == 0

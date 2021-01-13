@@ -490,7 +490,6 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         """Creates an UnifiedAlchemyMagicMock to mock a SQLAlchemy session."""
         kwargs["_mock_default"] = kwargs.pop("default", [])
         kwargs["_mock_data"] = kwargs.pop("data", None)
-
         kwargs.update(
             {
                 k: AlchemyMagicMock(side_effect=partial(self._get_data, _mock_name=k))
@@ -522,7 +521,9 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
     def _get_previous_calls(self, calls: Sequence[Call]) -> Iterator:
         """Gets the previous calls on the same line."""
-        return iter(takewhile(lambda i: i[0] not in self.boundary, reversed(calls)))
+        # the calls that end lines
+        call_enders = list(self.boundary.keys()) + ["delete"]
+        return iter(takewhile(lambda i: i[0] not in call_enders, reversed(calls)))
 
     def _get_previous_call(self, name: str, calls: Sequence[Call]) -> Optional[Call]:
         """Gets the previous call right before the current call."""
@@ -589,7 +590,6 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         _mock_name = kwargs.pop("_mock_name")
         _mock_default = self._mock_default
         _mock_data = self._mock_data
-
         if _mock_data is not None:
             previous_calls = [
                 sqlalchemy_call(
@@ -598,7 +598,6 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                 for i in self._get_previous_calls(self.mock_calls[:-1])
             ]
             sorted_mock_data = sorted(_mock_data, key=lambda x: len(x[0]), reverse=True)
-
             if _mock_name == "get":
                 query_call = [c for c in previous_calls if c[0] == "query"][0]
                 results = list(
@@ -623,7 +622,6 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                         for i in calls
                     ]
                     if all(c in previous_calls for c in calls):
-
                         return self.boundary[_mock_name](result, *args, **kwargs)
 
         return self.boundary[_mock_name](_mock_default, *args, **kwargs)
@@ -656,19 +654,32 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             _kwargs = kwargs.copy()
             # pretend like all is being called to get data
             _kwargs["_mock_name"] = "all"
-            # a list of deleted items
-            to_delete = list(self._get_data(*args, **_kwargs))
-            num_deleted = len(to_delete)
-            if to_delete:
-                query_call = mock.call.query(type(to_delete[0]))
-                mocked_data = next(
-                    iter(filter(lambda i: i[0] == [query_call], _mock_data)),
-                    None,
+            _mock_name = _kwargs.pop("_mock_name")
+            _mock_data = self._mock_data
+            num_deleted = 0
+            previous_calls = [
+                sqlalchemy_call(
+                    i, with_name=True, base_call=self.unify.get(i[0]) or Call
                 )
-                if mocked_data:
-                    # remove objects based on the same instances
-                    for row in to_delete:
-                        mocked_data[1].remove(row)
-            # we delete the data from the specific query
-            del to_delete
+                for i in self._get_previous_calls(self.mock_calls[:-1])
+            ]
+            sorted_mock_data = sorted(_mock_data, key=lambda x: len(x[0]), reverse=True)
+            temp_mock_data = list()
+            found_query = False
+            for calls, result in sorted_mock_data:
+                calls = [
+                    sqlalchemy_call(
+                        i,
+                        with_name=True,
+                        base_call=self.unify.get(i[0]) or Call,
+                    )
+                    for i in calls
+                ]
+                if all(c in previous_calls for c in calls) and not found_query:
+                    num_deleted = len(result)
+                    temp_mock_data.append((calls, []))
+                    found_query = True
+                else:
+                    temp_mock_data.append((calls, result))
+            self._mock_data = temp_mock_data
             return num_deleted
