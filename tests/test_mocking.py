@@ -5,6 +5,7 @@ from unittest import mock
 
 import pytest
 from sqlalchemy import Column
+from sqlalchemy import Float
 from sqlalchemy import Integer
 from sqlalchemy import or_
 from sqlalchemy import String
@@ -236,3 +237,64 @@ def test_unified_magic_mock() -> None:
     s = UnifiedAlchemyMagicMock()
     ret = s.query(Model).delete()
     assert ret == 0
+
+
+def test_complex_session() -> None:
+    """Tests mock for SQLAlchemy with more complex session."""
+
+    class Data(Base):
+        """SQLAlchemy object for testing."""
+
+        __tablename__ = "data_table"
+        pk1 = Column(Integer, primary_key=True)
+        data_p1 = Column(Float)
+        data_p2 = Column(Float)
+        name = Column(String)
+
+        def __repr__(self) -> str:
+            """Get strin of object."""
+            return str(self.pk1) + self.name
+
+    s = UnifiedAlchemyMagicMock(
+        data=[
+            (
+                [mock.call.query(Data), mock.call.filter(Data.data_p1 < 13)],
+                [
+                    Data(pk1=1, data_p1=11.4, data_p2=13.5, name="test1"),
+                    Data(pk1=2, data_p1=9.4, data_p2=19.5, name="test2"),
+                    Data(pk1=3, data_p1=4.7, data_p2=15.5, name="test3"),
+                    Data(pk1=4, data_p1=3.4, data_p2=13.5, name="test4"),
+                ],
+            ),
+            (
+                [mock.call.query(Data), mock.call.filter(Data.data_p1 >= 13)],
+                [
+                    Data(pk1=5, data_p1=16.3, data_p2=3.5, name="test6"),
+                    Data(pk1=6, data_p1=19.3, data_p2=10.5, name="test7"),
+                    Data(pk1=7, data_p1=13.3, data_p2=33.7, name="test8"),
+                ],
+            ),
+        ]
+    )
+    new_data = [
+        Data(pk1=8, data_p1=16.3, data_p2=38.15, name="test9"),
+        Data(pk1=9, data_p1=13.6, data_p2=33.5, name="test10"),
+        Data(pk1=10, data_p1=10.1, data_p2=331.35, name="test11"),
+        Data(pk1=1, data_p1=2.5, data_p2=67.1, name="test12"),
+    ]
+    s.add_all(new_data)
+    s.add(Data(pk1=11, data_p1=31.5, data_p2=67.1, name="test13"))
+    ret = s.query(Data).all()
+    expected_data = [str(r) for r in ret]
+    assert expected_data == ["8test9", "9test10", "10test11", "1test12", "11test13"]
+    n_d = s.query(Data).filter(Data.data_p1 < 13).delete()
+    assert n_d == 4
+    n_d = s.query(Data).filter(Data.data_p1 >= 13).delete()
+    assert n_d == 3
+    ret = s.query(Data).filter(Data.data_p1 >= 13).all()
+    assert ret == []
+    ret = s.query(Data).all()
+    expected_data = [str(r) for r in ret]
+    assert expected_data == ["8test9", "9test10", "10test11", "1test12", "11test13"]
+    ret = s.query(Data).filter(Data.data_p1 < 13).all()
+    assert ret == []
