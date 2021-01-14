@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mock-alchemy"
-version = "0.2.0"
+version = "0.2.1"
 description = "SQLAlchemy mock helpers."
 license = "MIT"
 homepage = "https://github.com/rajivsarvepalli/mock-alchemy"
