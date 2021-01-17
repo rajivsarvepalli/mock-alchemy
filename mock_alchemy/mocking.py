@@ -352,7 +352,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         ...    data_p1 = Column(Float)
         ...    data_p2 = Column(Float)
         ...    name = Column(String)
-        ...    def __repr__(self) -> str:
+        ...    def __repr__(self):
         ...        return str(self.pk1) + self.name
         >>> s = UnifiedAlchemyMagicMock(
         ...     data=[
