@@ -186,7 +186,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
     For example::
 
-        >>> from sqlalchemy import Column, Integer, String
+        >>> from sqlalchemy import Column, Integer, String, Float
         >>> from sqlalchemy.ext.declarative import declarative_base
 
         >>> Base = declarative_base()
@@ -346,6 +346,41 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         1
         >>> s.query(SomeClass).delete()
         0
+        >>> class Data(Base):
+        ...    __tablename__ = "data_table"
+        ...    pk1 = Column(Integer, primary_key=True)
+        ...    data_p1 = Column(Float)
+        ...    data_p2 = Column(Float)
+        ...    name = Column(String)
+        ...    def __repr__(self) -> str:
+        ...        return str(self.pk1) + self.name
+        >>> s = UnifiedAlchemyMagicMock(
+        ...     data=[
+        ...         (
+        ...             [mock.call.query(Data), mock.call.filter(Data.data_p1 < 13)],
+        ...             [
+        ...                 Data(pk1=1, data_p1=11.4, data_p2=13.5, name="test1"),
+        ...                 Data(pk1=2, data_p1=9.4, data_p2=19.5, name="test2"),
+        ...                 Data(pk1=3, data_p1=4.7, data_p2=15.5, name="test3"),
+        ...                 Data(pk1=4, data_p1=3.4, data_p2=13.5, name="test4"),
+        ...             ],
+        ...         ),
+        ...         (
+        ...             [mock.call.query(Data), mock.call.filter(Data.data_p1 >= 13)],
+        ...             [
+        ...                 Data(pk1=5, data_p1=16.3, data_p2=3.5, name="test6"),
+        ...                 Data(pk1=6, data_p1=19.3, data_p2=10.5, name="test7"),
+        ...                 Data(pk1=7, data_p1=13.3, data_p2=33.7, name="test8"),
+        ...             ],
+        ...         ),
+        ...     ]
+        ... )
+        >>> n_d = (
+        ...     s.query(Data)
+        ...     .filter(Data.data_p1 >= 13)
+        ...     .delete(synchronize_session=False, test1=1, test2=2)
+        ... )
+        >>> assert n_d == 3
 
     Also note that only within same query functions are unified.
     After ``.all()`` is called or query is iterated over, future queries are not unified.
@@ -555,20 +590,34 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             _kwargs = kwargs.copy()
             # pretend like all is being called to get data
             _kwargs["_mock_name"] = "all"
-            # a list of deleted items
-            to_delete = list(self._get_data(*args, **_kwargs))
-            num_deleted = len(to_delete)
-            if to_delete:
-                query_call = mock.call.query(type(to_delete[0]))
-                mocked_data = next(
-                    iter(filter(lambda i: i[0] == [query_call], _mock_data)),
-                    None,
+            _mock_name = _kwargs.pop("_mock_name")
+            _mock_data = self._mock_data
+            num_deleted = 0
+            previous_calls = [
+                sqlalchemy_call(
+                    i, with_name=True, base_call=self.unify.get(i[0]) or Call
                 )
-                if mocked_data:
-                    # remove objects based on the same instances
-                    num_deleted = len(to_delete)
-                    for row in to_delete:
-                        mocked_data[1].remove(row)
-            # we delete the data from the specific query
-            del to_delete
+                for i in self._get_previous_calls(self.mock_calls[:-1])
+            ]
+            sorted_mock_data = sorted(
+                _mock_data, key=lambda x: len(x[0]), reverse=True
+            )
+            temp_mock_data = []
+            found_query = False
+            for calls, result in sorted_mock_data:
+                calls = [
+                    sqlalchemy_call(
+                        i,
+                        with_name=True,
+                        base_call=self.unify.get(i[0]) or Call,
+                    )
+                    for i in calls
+                ]
+                if all(c in previous_calls for c in calls) and not found_query:
+                    num_deleted = len(result)
+                    temp_mock_data.append((calls, []))
+                    found_query = True
+                else:
+                    temp_mock_data.append((calls, result))
+            self._mock_data = temp_mock_data
             return num_deleted
