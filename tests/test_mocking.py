@@ -289,7 +289,12 @@ def test_complex_session() -> None:
     assert expected_data == ["8test9", "9test10", "10test11", "1test12", "11test13"]
     n_d = s.query(Data).filter(Data.data_p1 < 13).delete()
     assert n_d == 4
-    n_d = s.query(Data).filter(Data.data_p1 >= 13).delete()
+    # test arbitrary parameters to delete
+    n_d = (
+        s.query(Data)
+        .filter(Data.data_p1 >= 13)
+        .delete(synchronize_session=False, test1=1, test2=2)
+    )
     assert n_d == 3
     ret = s.query(Data).filter(Data.data_p1 >= 13).all()
     assert ret == []
