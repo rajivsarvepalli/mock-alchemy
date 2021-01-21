@@ -15,6 +15,7 @@ from typing import Optional
 from typing import overload
 from typing import Sequence
 from typing import Set
+from typing import Type
 from unittest import mock
 
 from sqlalchemy.orm.exc import MultipleResultsFound
@@ -43,7 +44,7 @@ class UnorderedTuple(tuple):
         True
     """
 
-    def __eq__(self, other: tuple) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Compares another tuple for equality."""
         if len(self) != len(other):
             return False
@@ -74,7 +75,7 @@ class UnorderedCall(Call):
         True
     """
 
-    def __eq__(self, other: Call) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Compares another call for equality."""
         _other = list(other)
         _other[-2] = UnorderedTuple(other[-2])
@@ -453,7 +454,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         ),
         "get": lambda x, idmap: get_item_attr(build_identity_map(x), idmap),
     }
-    unify: Dict[str, Optional[UnorderedCall]] = {
+    unify: Dict[str, Optional[Type[UnorderedCall]]] = {
         "query": None,
         "add_columns": None,
         "join": None,

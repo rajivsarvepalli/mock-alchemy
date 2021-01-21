@@ -88,7 +88,7 @@ def test_unified_magic_mock() -> None:
             """Get strin of object."""
             return str(self.pk1)
 
-        def __eq__(self, other: SomeClass) -> bool:
+        def __eq__(self, other: object) -> bool:
             """Object equality checker."""
             if isinstance(other, SomeClass):
                 return (
@@ -160,7 +160,7 @@ def test_unified_magic_mock() -> None:
         pk1 = Column(Integer, primary_key=True)
         name = Column(String)
 
-        def __eq__(self, other: Model) -> bool:
+        def __eq__(self, other: object) -> bool:
             """Object equality checker."""
             if isinstance(other, Model):
                 return self.pk1 == other.pk1 and self.name == other.name

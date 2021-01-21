@@ -181,6 +181,7 @@ class ExpressionMatcher(PrettyExpression):
 
             else:
                 return self.expr is other or self.expr == other
+        return None
 
     def __ne__(self, other: Any) -> bool:
         """Compares an expression to determine inequality."""

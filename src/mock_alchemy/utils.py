@@ -44,7 +44,7 @@ def match_type(
         return s.encode("utf-8")
 
 
-def copy_and_update(target: Dict, updater: Dict) -> Dict:
+def copy_and_update(target: Dict[Any, Any], updater: Dict[Any, Any]) -> Dict[Any, Any]:
     """Copy and update dictionary.
 
     Copy dictionary and update it all in one operation.
@@ -180,7 +180,7 @@ def raiser(exp: Type[Exception], *args: Any, **kwargs: Any) -> Type[Exception]:
     raise exp(*args, **kwargs)
 
 
-def build_identity_map(items: Sequence[Any]) -> Dict:
+def build_identity_map(items: Sequence[Any]) -> Dict[Any, Any]:
     """Builds identity map.
 
     Utility for building identity map from given SQLAlchemy models.
@@ -222,7 +222,10 @@ def build_identity_map(items: Sequence[Any]) -> Dict:
     return idmap
 
 
-def get_item_attr(idmap: Dict, access: Union[Dict, Tuple, int]) -> Any:
+def get_item_attr(
+    idmap: Dict[Tuple[int, ...], Any],
+    access: Union[Dict[str, int], Tuple[int, ...], int],
+) -> Any:
     """Access dictionary in different methods.
 
     Utility for accessing dict by different key types (for get).

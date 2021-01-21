@@ -9,6 +9,7 @@ import sys
 from datetime import datetime
 from typing import Any
 from typing import Dict
+from typing import Optional
 
 import mock_alchemy
 
@@ -49,7 +50,7 @@ html_css_files = [
 html_favicon = "_static/alchemy.svg"
 
 
-def linkcode_resolve(domain: str, info: Dict) -> str:
+def linkcode_resolve(domain: str, info: Dict[str, Any]) -> Optional[str]:
     """Determine the URL corresponding to Python object."""
     if domain != "py":
         return None
@@ -66,9 +67,9 @@ def linkcode_resolve(domain: str, info: Dict) -> str:
     try:
         source, lineno = inspect.getsourcelines(obj)
     except OSError:
-        lineno = None
+        lineno = -1
 
-    if lineno:
+    if lineno != -1:
         linespec = f"#L{lineno}-L{lineno + len(source) - 1}"
     else:
         linespec = ""
