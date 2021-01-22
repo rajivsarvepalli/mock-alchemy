@@ -430,7 +430,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
     are not unified.
     """
 
-    boundary: Dict[str, Callable] = {
+    boundary: Dict[str, Callable[..., Any]] = {
         "all": lambda x: x,
         "__iter__": lambda x: iter(x),
         "count": lambda x: len(x),
