@@ -47,8 +47,10 @@ Newer Versions
 ^^^^^^^^^^^^^^
 
 These versions support Python 3.7+ and have their development done off the `main branch <https://github.com/rajivsarvepalli/mock-alchemy>`__.
-The tests run for them are through ``nox`` and will run on any push or pull request to the main branch. To contribute to this branch, use the information
-below to support your contribution. The dependencies section on this document should give some information about what tools are required for development of `mock-alchemy <https://mock-alchemy.readthedocs.io/en/latest/api_reference>`__.
+The tests run for them are through ``nox`` and will run on any push or pull request to the main branch. The main branch mantains 100% codecov just like the 0.1.x branch.
+To contribute to this branch, use the information
+below to support your contribution. The dependencies section on this document should give some information about what tools are required for
+development of `mock-alchemy <https://mock-alchemy.readthedocs.io/en/latest/api_reference>`__.
 
 How to report a bug
 -------------------
