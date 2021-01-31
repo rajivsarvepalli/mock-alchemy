@@ -153,7 +153,7 @@ Your pull request needs to meet the following guidelines for acceptance:
 - Include unit tests. This project maintains 100% code coverage.
 - If your changes add functionality, update the documentation accordingly.
 
-Feel free to submit early, though—we can always iterate on this.
+Feel free to submit early, though we can always iterate on this.
 
 To run linting and code formatting checks before commiting your change, you can install pre-commit as a Git hook by running the following command:
 
