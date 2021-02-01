@@ -55,7 +55,7 @@ reorder-python-imports = "^2.3.6"
 sphinx-autodoc-typehints = "^1.11.1"
 sphinx-autobuild = "^2020.9.1"
 flake8-rst-docstrings = "^0.0.14"
-pre-commit = "^2.9.3"
+pre-commit = "^2.10.0"
 pre-commit-hooks = "^3.4.0"
 
 [build-system]
