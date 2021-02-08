@@ -86,7 +86,7 @@ The ones to download separately are ``tox``, ``poetry``, and ``pre-commit``. The
 ``poetry install`` can be used to install the project in the poetry virtual environment for development. Then tox can be used for testing and pre-commit for
 linting. `Poetry <https://python-poetry.org/>`__ is used for easy publishing and managing dependencies in a simpler manner than just pure setuptools.
 
-The major libraries used are ``tox``, ``flake8``, ``poetry``, and ``pre-commit``. A full list is available in ``requirements-dev.txt``.
+The major libraries used are ``tox``, ``flake8``, ``poetry``, and ``pre-commit``. A full list is available in ``requirements-dev.txt`` inside the 0.1.x branch.
 
 How to set up your development environment
 ------------------------------------------
