@@ -65,7 +65,7 @@ the readthedocs version system (click on the drop-down menu on the bottom right 
 📤 Credit
 ----------
 
-The original library (``alchemy-mock``) was created by Miroslav Shubernetskiy and Serkan Hoscai. This is a forked version due to a lack of updates
+The original library (``alchemy-mock``) was created by Miroslav Shubernetskiy and Serkan Hoscai. This is a forked version due to a lack of updates and new features
 in the original library. It appeared that the ``alchemy-mock`` project was no longer supported. Therefore, since I desired to add some basic support
 for deleting, I created my own version of the library. Full credit goes to the original creators for starting and building this project. You can find the
 original package on `PyPi <https://pypi.org/project/alchemy-mock/>`__ and `Github <https://github.com/miki725/alchemy-mock>`__.
