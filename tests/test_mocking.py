@@ -200,6 +200,10 @@ def test_unified_magic_mock() -> None:
     ret = s.query(Model).filter(Model.pk1 < 1).all()
     assert ret == []
     # test without equals
+    ret = s.query(Model).get(2)
+    assert ret == Model(pk1=2, name="test2")
+    ret = s.query(Model).get({"pk1": 2})
+    assert ret == Model(pk1=2, name="test2")
 
     class Model2(Base):
         """SQLAlchemy object for testing."""

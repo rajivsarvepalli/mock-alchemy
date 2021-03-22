@@ -159,6 +159,10 @@ such as ``session.add(instance)``. For example::
     Model(foo='bar')
     >>> session.query(Model).get(2)
     Model(foo='baz')
+    >>> session.query(Model).get((2,))
+    Model(foo='baz')
+    >>> session.query(Model).get({"pk2" : 2}))
+    Model(foo='baz')
 
 Note that its partially correct since if added models are filtered on,
 session is unable to actually apply any filters so it returns everything::
