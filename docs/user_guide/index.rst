@@ -451,7 +451,7 @@ Abstract Classes
 It is important to note that mock_alchemy uses Python object attributes instead of SQLAlchemy table attributes. Therefore, please make sure when testing that the column values
 are added as object attributes. Refer to the `SQLAlchemy documentation <https://docs.sqlalchemy.org/en/13/orm/constructors.html>`__ for the details on SQLAlchemy initialization, but for this library,
 attributes from Python objects are currently used to get column values. In the below example, this is why the primary key must be created inside the class Concrete's __init__. Normally, this is not a
-concern since if you do not write a constructor for your Python object, SQLAlchemy intiailzes the attributes for you. However, if you do write a constructor make sure that the class itself has those
+concern since if you do not write a constructor for your Python object, SQLAlchemy initializes the attributes for you. However, if you do write a constructor make sure that the class itself has those
 attributes set.
 
 .. code-block:: python
