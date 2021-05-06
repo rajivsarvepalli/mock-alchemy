@@ -1,6 +1,7 @@
 """Testing the module for mocking in mock-alchemy."""
 from __future__ import annotations
 
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -85,7 +86,7 @@ def test_unified_magic_mock() -> None:
         name = Column(String(50))
 
         def __repr__(self) -> str:
-            """Get strin of object."""
+            """Get string of object."""
             return str(self.pk1)
 
         def __eq__(self, other: SomeClass) -> bool:
@@ -167,7 +168,7 @@ def test_unified_magic_mock() -> None:
             return NotImplemented
 
         def __repr__(self) -> str:
-            """Get strin of object."""
+            """Get string of object."""
             return str(self.pk1)
 
     s = UnifiedAlchemyMagicMock()
@@ -213,7 +214,7 @@ def test_unified_magic_mock() -> None:
         name = Column(String)
 
         def __repr__(self) -> str:
-            """Get strin of object."""
+            """Get string of object."""
             return str(self.pk1)
 
     s = UnifiedAlchemyMagicMock(
@@ -256,7 +257,7 @@ def test_complex_session() -> None:
         name = Column(String)
 
         def __repr__(self) -> str:
-            """Get strin of object."""
+            """Get string of object."""
             return str(self.pk1) + self.name
 
     s = UnifiedAlchemyMagicMock(
@@ -307,3 +308,81 @@ def test_complex_session() -> None:
     assert expected_data == ["8test9", "9test10", "10test11", "1test12", "11test13"]
     ret = s.query(Data).filter(Data.data_p1 < 13).all()
     assert ret == []
+
+
+def test_abstract_classes() -> None:
+    """Tests mock for SQLAlchemy with inheritance and abstract classes."""
+
+    class BaseModel(Base):
+        """Abstract data model to test."""
+
+        __abstract__ = True
+        created = Column(Integer, nullable=False, default=3)
+        createdby = Column(Integer, nullable=False, default={})
+        updated = Column(Integer, nullable=False, default=1)
+        updatedby = Column(Integer, nullable=False, default={})
+        disabled = Column(Integer, nullable=True)
+
+    class Concrete(BaseModel):
+        """A testing SQLAlchemy object."""
+
+        __tablename__ = "concrete"
+        id = Column(Integer, primary_key=True)
+
+        def __init__(self, **kwargs: Any) -> None:
+            """Creates a Concrete object."""
+            self.id = kwargs.pop("id")
+            super(Concrete, self).__init__(**kwargs)
+
+        def __eq__(self, other: Concrete) -> bool:
+            """Equality override."""
+            return self.id == other.id
+
+    objs = Concrete(id=1)
+    session = UnifiedAlchemyMagicMock(
+        data=[
+            ([mock.call.query(Concrete)], [objs]),
+        ]
+    )
+    ret = session.query(Concrete).get(1)
+    assert ret == objs
+
+
+def test_get_tuple() -> None:
+    """Tests mock for SQLAlchemy with getting by a tuple."""
+
+    class SomeObject(Base):
+        """SQLAlchemy object for testing."""
+
+        __tablename__ = "some_table1"
+        pk1 = Column(String, primary_key=True)
+        name = Column(String(50))
+
+        def __repr__(self) -> str:
+            """Get string of object."""
+            return str(self.pk1)
+
+    mock_session = UnifiedAlchemyMagicMock()
+    mock_session.add(SomeObject(pk1="123", name="test"))
+    user = mock_session.query(SomeObject).get(("123",))
+    assert user is not None
+
+
+def test_get_singular() -> None:
+    """Tests mock for SQLAlchemy with getting by a singular value."""
+
+    class SomeData(Base):
+        """SQLAlchemy object for testing."""
+
+        __tablename__ = "some_table2"
+        pk1 = Column(String, primary_key=True)
+        name = Column(String(50))
+
+        def __repr__(self) -> str:
+            """Get string of object."""
+            return str(self.pk1)
+
+    mock_session = UnifiedAlchemyMagicMock()
+    mock_session.add(SomeData(pk1="123", name="test"))
+    user = mock_session.query(SomeData).get("123")
+    assert user is not None

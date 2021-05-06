@@ -445,6 +445,63 @@ for specific objects being present and ensure their values are correct and still
         anyalsis3 = session.query(CombinedAnalysis).get({"pk1": 3})
         assert anyalsis3 == expected_anyalsis3
 
+Abstract Classes
+^^^^^^^^^^^^^^^^
+
+It is important to note that mock_alchemy uses Python object attributes instead of SQLAlchemy table attributes. Therefore, please make sure when testing that the column values
+are added as object attributes. Refer to the `SQLAlchemy documentation <https://docs.sqlalchemy.org/en/13/orm/constructors.html>`__ for the details on SQLAlchemy initialization, but for this library,
+attributes from Python objects are currently used to get column values. In the below example, this is why the primary key must be created inside the class Concrete's __init__. Normally, this is not a
+concern since if you do not write a constructor for your Python object, SQLAlchemy intiailzes the attributes for you. However, if you do write a constructor make sure that the class itself has those
+attributes set.
+
+.. code-block:: python
+
+    import datetime
+    import mock
+
+    from sqlalchemy import Integer
+    from sqlalchemy import Column
+    from sqlalchemy.ext.declarative import declarative_base
+
+    from mock_alchemy.mocking import UnifiedAlchemyMagicMock
+
+    Base = declarative_base()
+
+
+    class BaseModel(Base):
+        """Abstract data model to test."""
+
+        __abstract__ = True
+        created = Column(Integer, nullable=False, default=3)
+        createdby = Column(Integer, nullable=False, default={})
+        updated = Column(Integer, nullable=False, default=1)
+        updatedby = Column(Integer, nullable=False, default={})
+        disabled = Column(Integer, nullable=True)
+
+    class Concrete(BaseModel):
+        """A testing SQLAlchemy object."""
+
+        __tablename__ = "concrete"
+        id = Column(Integer, primary_key=True)
+
+        def __init__(self, **kwargs: Any) -> None:
+            """Creates a Concrete object."""
+            self.id = kwargs.pop("id")
+            super(Concrete, self).__init__(**kwargs)
+
+        def __eq__(self, other: Concrete) -> bool:
+            """Equality override."""
+            return self.id == other.id
+
+    objs = Concrete(id=1)
+    session = UnifiedAlchemyMagicMock(
+        data=[
+            ([mock.call.query(Concrete)], [objs]),
+        ]
+    )
+    ret = session.query(Concrete).get(1)
+    assert ret == objs
+
 Contribute
 -----------
 

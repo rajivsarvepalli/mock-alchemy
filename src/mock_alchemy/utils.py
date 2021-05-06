@@ -222,18 +222,19 @@ def build_identity_map(items: Sequence[Any]) -> Dict:
     return idmap
 
 
-def get_item_attr(idmap: Dict, access: Union[Dict, Tuple, int]) -> Any:
+def get_item_attr(idmap: Dict, access: Union[Dict, Tuple, Any]) -> Any:
     """Access dictionary in different methods.
 
     Utility for accessing dict by different key types (for get).
 
     Args:
         idmap: A dictionary of identity map of SQLAlchemy objects.
-        access: The access pattern which should either be int, dictionary, or
-            a tuple. If it is dictionary it should map to the names of the primary keys
-            of the SQLAlchemy objects. If it is a tuple, it should be a set of keys to
-            search for. If it is an int, then the objects in question must have only one
-            primary key.
+        access: The access pattern which should either be basic data type, dictionary,
+            or a tuple. If it is dictionary it should map to the names of the primary
+            keys of the SQLAlchemy objects. If it is a tuple, it should be a set of
+            keys to search for. If it is not a dict or a tuple, then the objects in
+            question must have only one primary key of the type passed
+            (such as a string, integer, etc.).
 
     Returns:
         An SQlAlchemy object that was requested.
@@ -253,7 +254,7 @@ def get_item_attr(idmap: Dict, access: Union[Dict, Tuple, int]) -> Any:
         for names in sorted(access):
             keys.append(access[names])
         return idmap.get(tuple(keys))
-    elif isinstance(access, int):
-        return idmap.get((access,))
-    else:
+    elif isinstance(access, tuple):
         return idmap.get(access)
+    else:
+        return idmap.get((access,))
