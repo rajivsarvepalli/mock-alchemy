@@ -5,11 +5,15 @@
 <p align="center">
     <a href="https://mock-alchemy.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/mock-alchemy/badge/?version=latest"/></a>
     <a href="https://pypi.org/project/mock-alchemy/"><img src="https://img.shields.io/pypi/v/mock-alchemy.svg"/></a>
-    <a href="https://pypi.org/project/mock-alchemy/"><img src="https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/imgs/python_versions.svg"/></a>
     <a href="https://github.com/rajivsarvepalli/mock-alchemy/actions?workflow=Tests"><img src="https://github.com/rajivsarvepalli/mock-alchemy/workflows/Tests/badge.svg"/></a>
-    <a href="https://codecov.io/gh/rajivsarvepalli/mock-alchemy"><img src="https://codecov.io/gh/rajivsarvepalli/mock-alchemy/branch/master/graph/badge.svg"/></a>
+</p>
 
-</p><br/><br/>
+<p align="center">
+    <a href="https://codecov.io/gh/rajivsarvepalli/mock-alchemy"><img src="https://codecov.io/gh/rajivsarvepalli/mock-alchemy/branch/master/graph/badge.svg"/></a>
+    <a href="https://pypi.org/project/mock-alchemy/"><img src="https://raw.githubusercontent.com/rajivsarvepalli/mock-alchemy/master/imgs/python_versions.svg"/></a>
+        <a href="https://pepy.tech/project/mock-alchemy"><img src="https://pepy.tech/badge/mock-alchemy"/></a>
+</p>
+<br/><br/>
 
 ## 🤖 Mocking SQLAlchemy
 
