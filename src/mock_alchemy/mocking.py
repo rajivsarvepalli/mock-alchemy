@@ -170,7 +170,6 @@ class AlchemyMagicMock(mock.MagicMock):
         _new_parent: Optional[Any] = ...,
         **kwargs: Any,
     ) -> None:
-        """Creates AlchemyMagicMock that can be used as limited SQLAlchemy session."""
         ...  # pragma: no cover
 
     def __init__(self, *args, **kwargs) -> None:
@@ -315,14 +314,6 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         # .one()
         >>> s.query('foo').filter(c == 'three').one()
         3
-        >>> s.query('bar').filter(c == 'one').filter(c == 'two').one()
-        Traceback (most recent call last):
-        ...
-        sqlalchemy.orm.exc.NoResultFound: No row was found for one()
-        >>> s.query('foo').filter(c == 'one').filter(c == 'two').one()
-        Traceback (most recent call last):
-        ...
-        sqlalchemy.orm.exc.MultipleResultsFound: Multiple rows were found for one()
         >>> s.query('bar').filter(c == 'one').filter(c == 'two').one_or_none()
 
         # .get()
@@ -483,7 +474,6 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         _new_parent: Optional[Any] = ...,
         **kwargs: Any,
     ) -> None:
-        """Creates an UnifiedAlchemyMagicMock to mock a SQLAlchemy session."""
         ...  # pragma: no cover
 
     def __init__(self, *args, **kwargs) -> None:
@@ -544,7 +534,6 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         two: bool = ...,
         from_kall: bool = ...,
     ) -> None:
-        """Unify the SQLAlchemy expressions."""
         ...  # pragma: no cover
 
     def _unify(self, *args, **kwargs) -> Any:
