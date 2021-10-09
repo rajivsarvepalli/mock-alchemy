@@ -4,10 +4,12 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.exc import MultipleResultsFound
 
 from mock_alchemy.utils import build_identity_map
 from mock_alchemy.utils import copy_and_update
 from mock_alchemy.utils import get_item_attr
+from mock_alchemy.utils import get_scalar
 from mock_alchemy.utils import indexof
 from mock_alchemy.utils import match_type
 from mock_alchemy.utils import raiser
@@ -91,3 +93,20 @@ def test_get_attr() -> None:
     assert 2 == get_item_attr(idmap, 1)
     assert 2 == get_item_attr(idmap, {"pk": 1})
     assert 2 == get_item_attr(idmap, (1,))
+
+
+def test_get_scalar() -> None:
+    """Tests utility for getting scalar values."""
+
+    class GetScalar(Base):
+        __tablename__ = "get_scalar"
+        pk1 = Column(Integer, primary_key=True)
+        pk2 = Column(Integer, primary_key=True)
+        name = Column(String(50))
+
+    assert 1 == get_scalar([GetScalar(pk1=1, pk2=2)])
+    assert None is get_scalar([GetScalar(pk1=None, pk2=2)])
+    assert None is get_scalar([])
+    with pytest.raises(MultipleResultsFound):
+        get_scalar([GetScalar(pk1=1, pk2=2), GetScalar(pk1=2, pk2=3)])
+    assert None is get_scalar([GetScalar(pk1=None, pk2=None)])

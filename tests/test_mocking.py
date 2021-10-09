@@ -11,6 +11,7 @@ from sqlalchemy import Integer
 from sqlalchemy import or_
 from sqlalchemy import String
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.sql.expression import column
 
 from mock_alchemy.comparison import ExpressionMatcher
@@ -386,3 +387,63 @@ def test_get_singular() -> None:
     mock_session.add(SomeData(pk1="123", name="test"))
     user = mock_session.query(SomeData).get("123")
     assert user is not None
+
+
+def test_scalar_singular() -> None:
+    """Tests mock for SQLAlchemy with scalar when there is one row."""
+
+    class ScalarSingular(Base):
+        """SQLAlchemy object for testing."""
+
+        __tablename__ = "scalar_singular"
+        pk1 = Column(String, primary_key=True)
+        name = Column(String(50))
+
+        def __repr__(self) -> str:
+            """Get string of object."""
+            return str(self.pk1)
+
+    mock_session = UnifiedAlchemyMagicMock()
+    mock_session.add(ScalarSingular(pk1="123", name="test"))
+    data_pk1 = mock_session.query(ScalarSingular).scalar()
+    assert data_pk1 == "123"
+
+
+def test_scalar_none() -> None:
+    """Tests mock for SQLAlchemy with scalar when rows are empty."""
+
+    class ScalarNone(Base):
+        """SQLAlchemy object for testing."""
+
+        __tablename__ = "scalar_none"
+        pk1 = Column(String, primary_key=True)
+        name = Column(String(50))
+
+        def __repr__(self) -> str:
+            """Get string of object."""
+            return str(self.pk1)
+
+    mock_session = UnifiedAlchemyMagicMock()
+    data = mock_session.query(ScalarNone).scalar()
+    assert data is None
+
+
+def test_scalar_multiple() -> None:
+    """Tests mock for SQLAlchemy with scalar when there are many rows."""
+
+    class ScalarMultiple(Base):
+        """SQLAlchemy object for testing."""
+
+        __tablename__ = "scalar_multiple"
+        pk1 = Column(String, primary_key=True)
+        name = Column(String(50))
+
+        def __repr__(self) -> str:
+            """Get string of object."""
+            return str(self.pk1)
+
+    mock_session = UnifiedAlchemyMagicMock()
+    mock_session.add(ScalarMultiple(pk1="123", name="test"))
+    mock_session.add(ScalarMultiple(pk1="1234", name="test"))
+    with pytest.raises(MultipleResultsFound):
+        mock_session.query(ScalarMultiple).scalar()
