@@ -6,4 +6,5 @@ max-complexity = 10
 application-import-names = mock_alchemy,tests
 import-order-style = pep8
 docstring-convention = google
-per-file-ignores = tests/*:S101
+per-file-ignores =
+    tests/*:S101,I202

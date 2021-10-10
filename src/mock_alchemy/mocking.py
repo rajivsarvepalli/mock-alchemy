@@ -12,9 +12,9 @@ from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Optional
-from typing import overload
 from typing import Sequence
 from typing import Set
+from typing import overload
 from unittest import mock
 
 from sqlalchemy.orm.exc import MultipleResultsFound
@@ -24,6 +24,7 @@ from .comparison import ExpressionMatcher
 from .utils import build_identity_map
 from .utils import copy_and_update
 from .utils import get_item_attr
+from .utils import get_scalar
 from .utils import indexof
 from .utils import raiser
 from .utils import setattr_tmp
@@ -311,8 +312,10 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         1
         >>> s.query('bar').filter(c == 'one').filter(c == 'two').first()
 
-        # .one()
+        # .one() and scalar
         >>> s.query('foo').filter(c == 'three').one()
+        3
+        >>> s.query('foo').filter(c == 'three').scalar()
         3
         >>> s.query('bar').filter(c == 'one').filter(c == 'two').one_or_none()
 
@@ -414,6 +417,8 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         1
         >>> s.query(SomeClass).delete()
         0
+        >>> s.query(SomeClass).scalar()
+        None
 
     Also note that only within same query functions are unified.
     After ``.all()`` is called or query is iterated over, future queries
@@ -443,6 +448,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             else None
         ),
         "get": lambda x, idmap: get_item_attr(build_identity_map(x), idmap),
+        "scalar": lambda x: get_scalar(x),
     }
     unify: Dict[str, Optional[UnorderedCall]] = {
         "query": None,

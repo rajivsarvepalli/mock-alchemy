@@ -12,6 +12,7 @@ from typing import Type
 from typing import Union
 
 from sqlalchemy import inspect
+from sqlalchemy.orm.exc import MultipleResultsFound
 
 
 def match_type(
@@ -258,3 +259,14 @@ def get_item_attr(idmap: Dict, access: Union[Dict, Tuple, Any]) -> Any:
         return idmap.get(access)
     else:
         return idmap.get((access,))
+
+
+def get_scalar(rows: Sequence[Any]) -> Any:
+    """Utility for mocking sqlalchemy.orm.Query.scalar()."""
+    if len(rows) == 1:
+        key = rows[0].__table__.columns.keys()[0]
+        return getattr(rows[0], key)
+    elif len(rows) > 1:
+        raise MultipleResultsFound("Multiple rows were found for scalar()")
+    else:
+        return None

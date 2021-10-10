@@ -1,17 +1,18 @@
 """Testing the module for utils in mock-alchemy."""
 import pytest
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.exc import MultipleResultsFound
 
 from mock_alchemy.utils import build_identity_map
 from mock_alchemy.utils import copy_and_update
 from mock_alchemy.utils import get_item_attr
+from mock_alchemy.utils import get_scalar
 from mock_alchemy.utils import indexof
 from mock_alchemy.utils import match_type
 from mock_alchemy.utils import raiser
 from mock_alchemy.utils import setattr_tmp
+
+from .common import SomeClass
 
 Base = declarative_base()
 
@@ -70,16 +71,6 @@ def test_raiser() -> None:
 
 def test_idmap() -> None:
     """Tests building an idmap."""
-
-    class SomeClass(Base):
-        __tablename__ = "some_table"
-        pk1 = Column(Integer, primary_key=True)
-        pk2 = Column(Integer, primary_key=True)
-        name = Column(String(50))
-
-        def __repr__(self) -> str:
-            return str(self.pk1)
-
     expected_idmap = {(1, 2): 1}
     idmap = build_identity_map([SomeClass(pk1=1, pk2=2)])
     assert str(expected_idmap) == str(idmap)
@@ -91,3 +82,13 @@ def test_get_attr() -> None:
     assert 2 == get_item_attr(idmap, 1)
     assert 2 == get_item_attr(idmap, {"pk": 1})
     assert 2 == get_item_attr(idmap, (1,))
+
+
+def test_get_scalar() -> None:
+    """Tests utility for getting scalar values."""
+    assert 1 == get_scalar([SomeClass(pk1=1, pk2=2)])
+    assert None is get_scalar([SomeClass(pk1=None, pk2=2)])
+    assert None is get_scalar([])
+    with pytest.raises(MultipleResultsFound):
+        get_scalar([SomeClass(pk1=1, pk2=2), SomeClass(pk1=2, pk2=3)])
+    assert None is get_scalar([SomeClass(pk1=None, pk2=None)])

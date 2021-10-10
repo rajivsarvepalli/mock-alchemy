@@ -1,24 +1,27 @@
 """Testing the module for mocking in mock-alchemy."""
 from __future__ import annotations
 
-from typing import Any
 from unittest import mock
 
 import pytest
 from sqlalchemy import Column
-from sqlalchemy import Float
-from sqlalchemy import Integer
-from sqlalchemy import or_
 from sqlalchemy import String
+from sqlalchemy import or_
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.sql.expression import column
 
 from mock_alchemy.comparison import ExpressionMatcher
 from mock_alchemy.mocking import AlchemyMagicMock
-from mock_alchemy.mocking import sqlalchemy_call
 from mock_alchemy.mocking import UnifiedAlchemyMagicMock
 from mock_alchemy.mocking import UnorderedCall
 from mock_alchemy.mocking import UnorderedTuple
+from mock_alchemy.mocking import sqlalchemy_call
+
+from .common import Concrete
+from .common import Data
+from .common import Model
+from .common import SomeClass
 
 Base = declarative_base()
 
@@ -76,29 +79,6 @@ def test_unified_magic_mock() -> None:
     assert 2 == s.filter.call_count
     _ = s.filter.assert_any_call(c == "one", c == "two")
     _ = s.filter.assert_any_call(c == "three", c == "four")
-
-    class SomeClass(Base):
-        """SQLAlchemy object for testing."""
-
-        __tablename__ = "some_table"
-        pk1 = Column(Integer, primary_key=True)
-        pk2 = Column(Integer, primary_key=True)
-        name = Column(String(50))
-
-        def __repr__(self) -> str:
-            """Get string of object."""
-            return str(self.pk1)
-
-        def __eq__(self, other: SomeClass) -> bool:
-            """Object equality checker."""
-            if isinstance(other, SomeClass):
-                return (
-                    self.pk1 == other.pk1
-                    and self.pk2 == other.pk2
-                    and self.name == other.name
-                )
-            return NotImplemented
-
     s = UnifiedAlchemyMagicMock(
         data=[
             (
@@ -153,24 +133,6 @@ def test_unified_magic_mock() -> None:
     assert ret == 2
     ret = s.query(SomeClass).delete()
     assert ret == 0
-
-    class Model(Base):
-        """SQLAlchemy object for testing."""
-
-        __tablename__ = "model_table"
-        pk1 = Column(Integer, primary_key=True)
-        name = Column(String)
-
-        def __eq__(self, other: Model) -> bool:
-            """Object equality checker."""
-            if isinstance(other, Model):
-                return self.pk1 == other.pk1 and self.name == other.name
-            return NotImplemented
-
-        def __repr__(self) -> str:
-            """Get string of object."""
-            return str(self.pk1)
-
     s = UnifiedAlchemyMagicMock()
     s.add_all([SomeClass(pk1=2, pk2=2)])
     s.add_all([Model(pk1=5, name="test")])
@@ -205,39 +167,27 @@ def test_unified_magic_mock() -> None:
     assert ret == Model(pk1=2, name="test2")
     ret = s.query(Model).get({"pk1": 2})
     assert ret == Model(pk1=2, name="test2")
-
-    class Model2(Base):
-        """SQLAlchemy object for testing."""
-
-        __tablename__ = "model_table_2"
-        pk1 = Column(Integer, primary_key=True)
-        name = Column(String)
-
-        def __repr__(self) -> str:
-            """Get string of object."""
-            return str(self.pk1)
-
     s = UnifiedAlchemyMagicMock(
         data=[
             (
-                [mock.call.query(Model2), mock.call.filter(Model2.pk1 < 1)],
-                [Model2(pk1=1, name="test1")],
+                [mock.call.query(Model), mock.call.filter(Model.pk1 < 1)],
+                [Model(pk1=1, name="test1")],
             ),
             (
-                [mock.call.query(Model2)],
-                [Model2(pk1=2, name="test2")],
+                [mock.call.query(Model)],
+                [Model(pk1=2, name="test2")],
             ),
         ]
     )
-    ret = s.query(Model2).filter(Model2.pk1 < 1).all()
+    ret = s.query(Model).filter(Model.pk1 < 1).all()
     ret = [str(r) for r in ret]
     assert ret == ["1"]
-    ret = s.query(Model2).filter(Model2.pk1 < 1).delete()
+    ret = s.query(Model).filter(Model.pk1 < 1).delete()
     assert ret == 1
-    ret = s.query(Model2).all()
+    ret = s.query(Model).all()
     ret = [str(r) for r in ret]
     assert ret == ["2"]
-    ret = s.query(Model2).filter(Model2.pk1 < 1).all()
+    ret = s.query(Model).filter(Model.pk1 < 1).all()
     assert ret == []
     s = UnifiedAlchemyMagicMock()
     ret = s.query(Model).delete()
@@ -246,20 +196,6 @@ def test_unified_magic_mock() -> None:
 
 def test_complex_session() -> None:
     """Tests mock for SQLAlchemy with more complex session."""
-
-    class Data(Base):
-        """SQLAlchemy object for testing."""
-
-        __tablename__ = "data_table"
-        pk1 = Column(Integer, primary_key=True)
-        data_p1 = Column(Float)
-        data_p2 = Column(Float)
-        name = Column(String)
-
-        def __repr__(self) -> str:
-            """Get string of object."""
-            return str(self.pk1) + self.name
-
     s = UnifiedAlchemyMagicMock(
         data=[
             (
@@ -312,32 +248,6 @@ def test_complex_session() -> None:
 
 def test_abstract_classes() -> None:
     """Tests mock for SQLAlchemy with inheritance and abstract classes."""
-
-    class BaseModel(Base):
-        """Abstract data model to test."""
-
-        __abstract__ = True
-        created = Column(Integer, nullable=False, default=3)
-        createdby = Column(Integer, nullable=False, default={})
-        updated = Column(Integer, nullable=False, default=1)
-        updatedby = Column(Integer, nullable=False, default={})
-        disabled = Column(Integer, nullable=True)
-
-    class Concrete(BaseModel):
-        """A testing SQLAlchemy object."""
-
-        __tablename__ = "concrete"
-        id = Column(Integer, primary_key=True)
-
-        def __init__(self, **kwargs: Any) -> None:
-            """Creates a Concrete object."""
-            self.id = kwargs.pop("id")
-            super(Concrete, self).__init__(**kwargs)
-
-        def __eq__(self, other: Concrete) -> bool:
-            """Equality override."""
-            return self.id == other.id
-
     objs = Concrete(id=1)
     session = UnifiedAlchemyMagicMock(
         data=[
@@ -350,39 +260,63 @@ def test_abstract_classes() -> None:
 
 def test_get_tuple() -> None:
     """Tests mock for SQLAlchemy with getting by a tuple."""
-
-    class SomeObject(Base):
-        """SQLAlchemy object for testing."""
-
-        __tablename__ = "some_table1"
-        pk1 = Column(String, primary_key=True)
-        name = Column(String(50))
-
-        def __repr__(self) -> str:
-            """Get string of object."""
-            return str(self.pk1)
-
     mock_session = UnifiedAlchemyMagicMock()
-    mock_session.add(SomeObject(pk1="123", name="test"))
-    user = mock_session.query(SomeObject).get(("123",))
+    mock_session.add(Model(pk1="123", name="test"))
+    user = mock_session.query(Model).get(("123",))
     assert user is not None
 
 
 def test_get_singular() -> None:
     """Tests mock for SQLAlchemy with getting by a singular value."""
+    mock_session = UnifiedAlchemyMagicMock()
+    mock_session.add(Model(pk1="123", name="test"))
+    user = mock_session.query(Model).get("123")
+    assert user is not None
 
-    class SomeData(Base):
+
+def test_scalar_singular() -> None:
+    """Tests mock for SQLAlchemy with scalar when there is one row."""
+    mock_session = UnifiedAlchemyMagicMock()
+    mock_session.add(Model(pk1="123", name="test"))
+    data_pk1 = mock_session.query(Model).scalar()
+    assert data_pk1 == "123"
+
+
+def test_scalar_none() -> None:
+    """Tests mock for SQLAlchemy with scalar when rows are empty."""
+    mock_session = UnifiedAlchemyMagicMock()
+    data = mock_session.query(Model).scalar()
+    assert data is None
+
+
+def test_scalar_multiple() -> None:
+    """Tests mock for SQLAlchemy with scalar when there are many rows."""
+    mock_session = UnifiedAlchemyMagicMock()
+    mock_session.add(Model(pk1="123", name="test"))
+    mock_session.add(Model(pk1="1234", name="test"))
+    with pytest.raises(MultipleResultsFound):
+        mock_session.query(Model).scalar()
+
+
+def test_scalar_attribute() -> None:
+    """Tests mock for SQLAlchemy with scalar for getting an attribute."""
+
+    class Attribute(Base):
         """SQLAlchemy object for testing."""
 
-        __tablename__ = "some_table2"
-        pk1 = Column(String, primary_key=True)
-        name = Column(String(50))
+        __tablename__ = "attribute"
+        name = Column(String(50), primary_key=True)
 
-        def __repr__(self) -> str:
-            """Get string of object."""
-            return str(self.pk1)
-
-    mock_session = UnifiedAlchemyMagicMock()
-    mock_session.add(SomeData(pk1="123", name="test"))
-    user = mock_session.query(SomeData).get("123")
-    assert user is not None
+    mock_session = UnifiedAlchemyMagicMock(
+        data=[
+            (
+                [
+                    mock.call.query(Model.name),
+                    mock.call.filter(Model.pk1 == 3),
+                ],
+                [Attribute(name="test")],
+            )
+        ]
+    )
+    data_name = mock_session.query(Model.name).filter(Model.pk1 == 3).scalar()
+    assert data_name == "test"

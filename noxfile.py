@@ -10,6 +10,7 @@ from nox_poetry import session
 
 package = "mock_alchemy"
 python_versions = ["3.9", "3.8", "3.7"]
+sqlalchemy_versions = ["1.3.22", "1.4.0"]
 nox.options.sessions = (
     "pre-commit",
     "safety",
@@ -85,7 +86,7 @@ def precommit(session: Session) -> None:
         "flake8-rst-docstrings",
         "flake8-annotations",
         "flake8-import-order",
-        "reorder-python-imports",
+        "isort",
         "pep8-naming",
         "pre-commit",
         "pre-commit-hooks",
@@ -115,9 +116,12 @@ def mypy(session: Session) -> None:
 
 
 @session(python=python_versions)
-def tests(session: Session) -> None:
+@nox.parametrize("sqlalchemy", sqlalchemy_versions)
+def tests(session: Session, sqlalchemy: str) -> None:
     """Run the test suite."""
     session.install(".")
+    # TODO: Revisit how to parameterize sessions for different sqlalchemy versions
+    session.run("pip", "install", f"sqlalchemy~={sqlalchemy}")
     session.install("coverage[toml]", "pytest", "pygments")
     try:
         session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
