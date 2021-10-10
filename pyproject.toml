@@ -51,11 +51,11 @@ sphinx-copybutton = "^0.4.0"
 pydata-sphinx-theme = "^0.7.0"
 pep8-naming = "^0.11.1"
 Pygments = "^2.9.0"
-reorder-python-imports = "^2.3.6"
 sphinx-autodoc-typehints = "^1.12.0"
 flake8-rst-docstrings = "^0.2.3"
 pre-commit = "^2.9.3"
 pre-commit-hooks = "^4.0.1"
+isort = "^5.9.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -71,3 +71,7 @@ source = ["mock_alchemy"]
 [tool.coverage.report]
 show_missing = true
 fail_under = 100
+
+[tool.isort]
+src_paths = ["src", "test"]
+force_single_line = true

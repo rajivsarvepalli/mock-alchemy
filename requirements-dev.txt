@@ -23,7 +23,7 @@ pydata-sphinx-theme
 pytest
 pytest-cov
 nox
-reorder-python-imports
+isort
 flake8-rst-docstrings
 pre-commit
 pre-commit-hooks

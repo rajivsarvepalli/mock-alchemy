@@ -122,6 +122,51 @@ session is unable to actually apply any filters so it returns everything::
    >>> session.query(Model).filter(Model.foo == 'bar').all()
    [Model(foo='bar'), Model(foo='baz')]
 
+Scalar in Sessions
+++++++++++++++++++
+You can now mock `scalar() <https://docs.sqlalchemy.org/en/14/orm/query.html#sqlalchemy.orm.Query.scalar>`__.
+The below example shows querying on a specific attribute and returning it using ``scalar()``.
+To do this you must create another object to represent the returned attribute (in this case, it is called
+``Attribute``). Scalar is then used to get the first column of the first row as shown.
+
+.. code-block:: python
+
+    from sqlalchemy import Column, String
+    from sqlalchemy.ext.declarative import declarative_base
+    from mock_alchemy.mocking import UnifiedAlchemyMagicMock
+    from unittest import mock
+
+    Base = declarative_base()
+
+    class SomeTable(Base):
+        """SQLAlchemy object representing some table."""
+        __tablename__ = "some_table"
+        pkey = Column(String, primary_key=True)
+        col1 = Column(String(50))
+
+    class SingleColumn(Base):
+        """SQLAlchemy object for mocking a query for a specific column."""
+        __tablename__ = "column"
+        col1 = Column(String(50), primary_key=True)
+
+    mock_session = UnifiedAlchemyMagicMock(
+        data=[
+            (
+                [
+                    mock.call.query(SomeTable.col1),
+                    mock.call.filter(SomeTable.pkey == 3),
+                ],
+                [SingleColumn(col1="test")],
+            )
+        ]
+    )
+    found_col1 = (
+        mock_session.query(SomeTable.col1)
+        .filter(SomeTable.pkey == 3)
+        .scalar()
+    )
+    assert found_col1 == "test"
+
 Deleting in Sessions
 ++++++++++++++++++++
 
@@ -444,6 +489,9 @@ for specific objects being present and ensure their values are correct and still
         expected_anyalsis3 = CombinedAnalysis(3, some, anyalsis, values)
         anyalsis3 = session.query(CombinedAnalysis).get({"pk1": 3})
         assert anyalsis3 == expected_anyalsis3
+
+
+
 
 Abstract Classes
 ^^^^^^^^^^^^^^^^

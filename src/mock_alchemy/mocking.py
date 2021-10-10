@@ -12,9 +12,9 @@ from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Optional
-from typing import overload
 from typing import Sequence
 from typing import Set
+from typing import overload
 from unittest import mock
 
 from sqlalchemy.orm.exc import MultipleResultsFound
