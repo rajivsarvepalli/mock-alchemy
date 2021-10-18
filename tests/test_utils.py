@@ -86,9 +86,8 @@ def test_get_attr() -> None:
 
 def test_get_scalar() -> None:
     """Tests utility for getting scalar values."""
-    assert 1 == get_scalar([SomeClass(pk1=1, pk2=2)])
-    assert None is get_scalar([SomeClass(pk1=None, pk2=2)])
+    assert 1 == get_scalar([(1, 2)])
+    assert None is get_scalar([(None, 2)])
     assert None is get_scalar([])
     with pytest.raises(MultipleResultsFound):
-        get_scalar([SomeClass(pk1=1, pk2=2), SomeClass(pk1=2, pk2=3)])
-    assert None is get_scalar([SomeClass(pk1=None, pk2=None)])
+        get_scalar([(1, 2), (2, 3)])
