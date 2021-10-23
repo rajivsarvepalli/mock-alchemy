@@ -336,11 +336,13 @@ def test_update_calls() -> None:
     # Test all()
     actual_row = mock_session.query(Model).filter(Model.pk1 == 3).all()
     assert expected_row == actual_row
-    mock_session.query(Model).filter(Model.pk1 == 3).update()
+    mock_session.query(Model).filter(Model.pk1 == 3).update({"pk1": 3})
     actual_row = mock_session.query(Model).filter(Model.pk1 == 3).all()
     assert expected_row == actual_row
     # Test delete()
-    assert None is mock_session.query(Model).filter(Model.pk1 == 3).update()
+    assert None is mock_session.query(Model).filter(Model.pk1 == 3).update(
+        {"pk1": 3}, synchronize_session="evaluate"
+    )
     deleted_count = mock_session.query(Model).filter(Model.pk1 == 3).delete()
     assert 1 == deleted_count
     actual_row = mock_session.query(Model).filter(Model.pk1 == 3).all()
