@@ -313,3 +313,35 @@ def test_scalar_attribute() -> None:
     )
     data_column = mock_session.query(Model.name).filter(Model.pk1 == 3).scalar()
     assert expected_column_val == data_column
+
+
+# TODO: Make all unknown terminating calls have no impact on mock sessions
+def test_update_calls() -> None:
+    """Tests that update calls have no impact on UnifiedAlchemyMagicMock sessions.
+
+    This should eventually work the same for any unknown calls.
+    """
+    expected_row = [Model(pk1="1234", name="test")]
+    mock_session = UnifiedAlchemyMagicMock(
+        data=[
+            (
+                [
+                    mock.call.query(Model),
+                    mock.call.filter(Model.pk1 == 3),
+                ],
+                expected_row,
+            )
+        ]
+    )
+    # Test all()
+    actual_row = mock_session.query(Model).filter(Model.pk1 == 3).all()
+    assert expected_row == actual_row
+    mock_session.query(Model).filter(Model.pk1 == 3).update()
+    actual_row = mock_session.query(Model).filter(Model.pk1 == 3).all()
+    assert expected_row == actual_row
+    # Test delete()
+    assert None is mock_session.query(Model).filter(Model.pk1 == 3).update()
+    deleted_count = mock_session.query(Model).filter(Model.pk1 == 3).delete()
+    assert 1 == deleted_count
+    actual_row = mock_session.query(Model).filter(Model.pk1 == 3).all()
+    assert [] == actual_row
