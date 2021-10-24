@@ -1,10 +1,3 @@
----
-name: Minor Change
-about: Create a pull request to make a minor change
-title: ""
-assignees: ""
----
-
 - **Please check if the PR fulfills these requirements**
 
 * [ ] The package maintains 100% code coverage.
