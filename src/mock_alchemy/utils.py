@@ -264,9 +264,12 @@ def get_item_attr(idmap: Dict, access: Union[Dict, Tuple, Any]) -> Any:
 def get_scalar(rows: Sequence[Any]) -> Any:
     """Utility for mocking sqlalchemy.orm.Query.scalar()."""
     if len(rows) == 1:
-        key = rows[0].__table__.columns.keys()[0]
-        return getattr(rows[0], key)
+        try:
+            return rows[0][0]
+        except TypeError:
+            return rows[0]
     elif len(rows) > 1:
-        raise MultipleResultsFound("Multiple rows were found for scalar()")
-    else:
-        return None
+        raise MultipleResultsFound(
+            "Multiple rows were found when exactly one was required"
+        )
+    return None

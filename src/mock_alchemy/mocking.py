@@ -449,6 +449,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         ),
         "get": lambda x, idmap: get_item_attr(build_identity_map(x), idmap),
         "scalar": lambda x: get_scalar(x),
+        "update": lambda x, *args, **kwargs: None,
     }
     unify: Dict[str, Optional[UnorderedCall]] = {
         "query": None,

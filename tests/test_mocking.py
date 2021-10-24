@@ -4,8 +4,6 @@ from __future__ import annotations
 from unittest import mock
 
 import pytest
-from sqlalchemy import Column
-from sqlalchemy import String
 from sqlalchemy import or_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.exc import MultipleResultsFound
@@ -277,9 +275,10 @@ def test_get_singular() -> None:
 def test_scalar_singular() -> None:
     """Tests mock for SQLAlchemy with scalar when there is one row."""
     mock_session = UnifiedAlchemyMagicMock()
-    mock_session.add(Model(pk1="123", name="test"))
-    data_pk1 = mock_session.query(Model).scalar()
-    assert data_pk1 == "123"
+    expected_model = Model(pk1="123", name="test")
+    mock_session.add(expected_model)
+    actual_model = mock_session.query(Model).scalar()
+    assert expected_model == actual_model
 
 
 def test_scalar_none() -> None:
@@ -300,13 +299,7 @@ def test_scalar_multiple() -> None:
 
 def test_scalar_attribute() -> None:
     """Tests mock for SQLAlchemy with scalar for getting an attribute."""
-
-    class Attribute(Base):
-        """SQLAlchemy object for testing."""
-
-        __tablename__ = "attribute"
-        name = Column(String(50), primary_key=True)
-
+    expected_column_val = "test"
     mock_session = UnifiedAlchemyMagicMock(
         data=[
             (
@@ -314,9 +307,43 @@ def test_scalar_attribute() -> None:
                     mock.call.query(Model.name),
                     mock.call.filter(Model.pk1 == 3),
                 ],
-                [Attribute(name="test")],
+                [(expected_column_val,)],
             )
         ]
     )
-    data_name = mock_session.query(Model.name).filter(Model.pk1 == 3).scalar()
-    assert data_name == "test"
+    data_column = mock_session.query(Model.name).filter(Model.pk1 == 3).scalar()
+    assert expected_column_val == data_column
+
+
+# TODO: Make all unknown terminating calls have no impact on mock sessions
+def test_update_calls() -> None:
+    """Tests that update calls have no impact on UnifiedAlchemyMagicMock sessions.
+
+    This should eventually work the same for any unknown calls.
+    """
+    expected_row = [Model(pk1="1234", name="test")]
+    mock_session = UnifiedAlchemyMagicMock(
+        data=[
+            (
+                [
+                    mock.call.query(Model),
+                    mock.call.filter(Model.pk1 == 3),
+                ],
+                expected_row,
+            )
+        ]
+    )
+    # Test all()
+    actual_row = mock_session.query(Model).filter(Model.pk1 == 3).all()
+    assert expected_row == actual_row
+    mock_session.query(Model).filter(Model.pk1 == 3).update({"pk1": 3})
+    actual_row = mock_session.query(Model).filter(Model.pk1 == 3).all()
+    assert expected_row == actual_row
+    # Test delete()
+    assert None is mock_session.query(Model).filter(Model.pk1 == 3).update(
+        {"pk1": 3}, synchronize_session="evaluate"
+    )
+    deleted_count = mock_session.query(Model).filter(Model.pk1 == 3).delete()
+    assert 1 == deleted_count
+    actual_row = mock_session.query(Model).filter(Model.pk1 == 3).all()
+    assert [] == actual_row

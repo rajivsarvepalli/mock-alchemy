@@ -125,12 +125,14 @@ session is unable to actually apply any filters so it returns everything::
 Scalar in Sessions
 ++++++++++++++++++
 You can now mock `scalar() <https://docs.sqlalchemy.org/en/14/orm/query.html#sqlalchemy.orm.Query.scalar>`__.
-The below example shows querying on a specific attribute and returning it using ``scalar()``.
-To do this you must create another object to represent the returned attribute (in this case, it is called
-``Attribute``). Scalar is then used to get the first column of the first row as shown.
+There are several limitations with using scalar. One is that when querying on column(s), your mocked data object
+must return an indexable sequence. However, when querying on a table, the returned object must not be indexable.
+This is due to the property of `scalar()` in native SQLAlchemy returning an object when a select is performed on a table and
+returning a specific column value when a select is performed on a column. The below example illustrates both use cases.
 
 .. code-block:: python
 
+    from __future__ import annotations
     from sqlalchemy import Column, String
     from sqlalchemy.ext.declarative import declarative_base
     from mock_alchemy.mocking import UnifiedAlchemyMagicMock
@@ -144,28 +146,43 @@ To do this you must create another object to represent the returned attribute (i
         pkey = Column(String, primary_key=True)
         col1 = Column(String(50))
 
-    class SingleColumn(Base):
-        """SQLAlchemy object for mocking a query for a specific column."""
-        __tablename__ = "column"
-        col1 = Column(String(50), primary_key=True)
+        def __eq__(self, other: Model) -> bool:
+            """Object equality checker."""
+            if isinstance(other, SomeTable):
+                return self.pkey == other.pkey and self.col1 == other.col1
+            return NotImplemented
 
+    col1_val = "val"
+    row1 = SomeTable(pkey=1, col1=col1_val)
     mock_session = UnifiedAlchemyMagicMock(
         data=[
             (
                 [
                     mock.call.query(SomeTable.col1),
-                    mock.call.filter(SomeTable.pkey == 3),
+                    mock.call.filter(SomeTable.pkey == 1),
                 ],
-                [SingleColumn(col1="test")],
-            )
+                [(col1_val,)],
+            ),
+            (
+                [
+                    mock.call.query(SomeTable),
+                    mock.call.filter(SomeTable.pkey == 1),
+                ],
+                [row1],
+            ),
         ]
     )
-    found_col1 = (
-        mock_session.query(SomeTable.col1)
-        .filter(SomeTable.pkey == 3)
-        .scalar()
-    )
-    assert found_col1 == "test"
+
+    #### Selecting on a column and using scalar()
+
+    found_col1 = mock_session.query(SomeTable.col1).filter(SomeTable.pkey == 1).scalar()
+    assert col1_val == found_col1
+
+    #### Selecting on a table and using scalar()
+
+    found_row = mock_session.query(SomeTable).filter(SomeTable.pkey == 1).scalar()
+    assert row1 == found_row
+
 
 Deleting in Sessions
 ++++++++++++++++++++
