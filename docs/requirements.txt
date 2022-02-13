@@ -2,5 +2,5 @@ sphinx==4.4.0
 sphinx-autobuild==2021.3.14
 sphinx-autodoc-typehints==1.16.0
 sphinx-copybutton==0.4.0
-pydata-sphinx-theme==0.7.2
+pydata-sphinx-theme==0.8.0
 mock_alchemy
