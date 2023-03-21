@@ -465,7 +465,6 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         "limit": None,
         "query": None,
         "scalars": None,
-        "scalar": None,
         "where": None,
     }
 
@@ -600,7 +599,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             ]
             sorted_mock_data = sorted(_mock_data, key=lambda x: len(x[0]), reverse=True)
             if _mock_name == "get":
-                query_call = [c for c in previous_calls if c[0] == "query"][0]
+                query_call = [c for c in previous_calls if c[0] in ["query", "execute"]][0]
                 results = list(
                     chain(
                         *[
