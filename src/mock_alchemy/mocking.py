@@ -454,6 +454,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
     unify: Dict[str, Optional[UnorderedCall]] = {
         "query": None,
         "add_columns": None,
+        "execute": None,
         "join": None,
         "options": None,
         "group_by": None,
