@@ -126,7 +126,7 @@ def sqlalchemy_call(call: Call, with_name: bool = False, base_call: Any = Call) 
         return base_call((args, kwargs), two=True)
 
 
-class AlchemyMagicMock(mock.MagicMock):
+class AlchemyMagicMock(mock.AsyncMock):
     """Compares SQLAlchemy expressions for simple asserts.
 
     MagicMock for SQLAlchemy which can compare alchemys expressions in assertions.
