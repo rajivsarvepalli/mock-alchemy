@@ -452,18 +452,21 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         "update": lambda x, *args, **kwargs: None,
     }
     unify: Dict[str, Optional[UnorderedCall]] = {
-        "query": None,
         "add_columns": None,
+        "distinct": None,
         "execute": None,
-        "join": None,
-        "options": None,
-        "group_by": None,
         "filter": UnorderedCall,
         "filter_by": UnorderedCall,
+        "group_by": None,
+        "join": None,
         "offset": None,
+        "options": None,
         "order_by": None,
         "limit": None,
-        "distinct": None,
+        "query": None,
+        "scalars": None,
+        "scalar": None,
+        "where": None,
     }
 
     mutate: Set[str] = {"add", "add_all", "delete"}
