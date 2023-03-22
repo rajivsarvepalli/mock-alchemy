@@ -176,6 +176,9 @@ class AlchemyMagicMock(mock.MagicMock):
         kwargs.setdefault("__name__", "Session")
         super(AlchemyMagicMock, self).__init__(*args, **kwargs)
 
+    async def __call__(self, *args, **kwargs):
+        return super(mock.AsyncMock, self).__call__(*args, **kwargs)
+
     def _format_mock_call_signature(self, args: Any, kwargs: Any) -> str:
         """Formats the mock call into a string."""
         name = self._mock_name or "mock"
