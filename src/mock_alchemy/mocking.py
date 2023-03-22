@@ -176,9 +176,6 @@ class AlchemyMagicMock(mock.MagicMock):
         kwargs.setdefault("__name__", "Session")
         super(AlchemyMagicMock, self).__init__(*args, **kwargs)
 
-    async def __call__(self, *args, **kwargs):
-        return super(mock.AsyncMock, self).__call__(*args, **kwargs)
-
     def _format_mock_call_signature(self, args: Any, kwargs: Any) -> str:
         """Formats the mock call into a string."""
         name = self._mock_name or "mock"
@@ -585,7 +582,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
         return submock.return_value
 
-    async def _get_data(self, *args: Any, **kwargs: Any) -> Any:
+    def _get_data(self, *args: Any, **kwargs: Any) -> Any:
         """Get the data for the SQLAlchemy expression."""
         _mock_name = kwargs.pop("_mock_name")
         _mock_default = self._mock_default
@@ -624,7 +621,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                     if all(c in previous_calls for c in calls):
                         return self.boundary[_mock_name](result, *args, **kwargs)
 
-        return await self.boundary[_mock_name](_mock_default, *args, **kwargs)
+        return self.boundary[_mock_name](_mock_default, *args, **kwargs)
 
     def _mutate_data(self, *args: Any, **kwargs: Any) -> Optional[int]:
         """Alter the data for the SQLAlchemy expression."""
