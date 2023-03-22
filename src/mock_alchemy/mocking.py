@@ -125,10 +125,6 @@ def sqlalchemy_call(call: Call, with_name: bool = False, base_call: Any = Call) 
     else:
         return base_call((args, kwargs), two=True)
 
-async def async_magic():
-    pass
-mock.MagicMock.__await__ = lambda x: async_magic().__await__()
-
 class AlchemyMagicMock(mock.MagicMock):
     """Compares SQLAlchemy expressions for simple asserts.
 
@@ -586,7 +582,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
         return submock.return_value
 
-    def _get_data(self, *args: Any, **kwargs: Any) -> Any:
+    async def _get_data(self, *args: Any, **kwargs: Any) -> Any:
         """Get the data for the SQLAlchemy expression."""
         _mock_name = kwargs.pop("_mock_name")
         _mock_default = self._mock_default
@@ -610,7 +606,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                         ]
                     )
                 )
-                return self.boundary[_mock_name](results, *args, **kwargs)
+                return await self.boundary[_mock_name](results, *args, **kwargs)
 
             else:
                 for calls, result in sorted_mock_data:
@@ -623,9 +619,9 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                         for i in calls
                     ]
                     if all(c in previous_calls for c in calls):
-                        return self.boundary[_mock_name](result, *args, **kwargs)
+                        return await self.boundary[_mock_name](result, *args, **kwargs)
 
-        return self.boundary[_mock_name](_mock_default, *args, **kwargs)
+        return await self.boundary[_mock_name](_mock_default, *args, **kwargs)
 
     def _mutate_data(self, *args: Any, **kwargs: Any) -> Optional[int]:
         """Alter the data for the SQLAlchemy expression."""
