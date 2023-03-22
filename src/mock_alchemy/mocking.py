@@ -589,7 +589,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         _mock_data = self._mock_data
         if _mock_data is not None:
             previous_calls = [
-                sqlalchemy_call(
+                await sqlalchemy_call(
                     i, with_name=True, base_call=self.unify.get(i[0]) or Call
                 )
                 for i in self._get_previous_calls(self.mock_calls[:-1])
@@ -606,12 +606,12 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                         ]
                     )
                 )
-                return await self.boundary[_mock_name](results, *args, **kwargs)
+                return self.boundary[_mock_name](results, *args, **kwargs)
 
             else:
                 for calls, result in sorted_mock_data:
                     calls = [
-                        sqlalchemy_call(
+                        await sqlalchemy_call(
                             i,
                             with_name=True,
                             base_call=self.unify.get(i[0]) or Call,
@@ -619,7 +619,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                         for i in calls
                     ]
                     if all(c in previous_calls for c in calls):
-                        return await self.boundary[_mock_name](result, *args, **kwargs)
+                        return self.boundary[_mock_name](result, *args, **kwargs)
 
         return await self.boundary[_mock_name](_mock_default, *args, **kwargs)
 
