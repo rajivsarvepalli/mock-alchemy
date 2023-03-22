@@ -155,8 +155,8 @@ class AlchemyMagicMock(mock.MagicMock):
         Actual: filter(BinaryExpression(sql='"column" = :column_1', \
         params={'column_1': 5}))
     """
-    async def __call__(self, *args, **kwargs):
-        return super(mock.AsyncMock, self).__call__(*args, **kwargs)
+    # async def __call__(self, *args, **kwargs):
+    #     return super(mock.AsyncMock, self).__call__(*args, **kwargs)
 
     @overload
     def __init__(
