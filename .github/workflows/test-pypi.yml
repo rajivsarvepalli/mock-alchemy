@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: "3.8"
           architecture: x64
-      - run: pip install poetry==1.1.4
+      - run: pip install --constraint=.github/workflows/constraints.txt poetry
       - run: >-
           poetry version patch &&
           version=$(poetry version | awk '{print $2}') &&
