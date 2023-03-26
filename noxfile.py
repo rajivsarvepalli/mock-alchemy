@@ -9,8 +9,8 @@ from nox_poetry import Session
 from nox_poetry import session
 
 package = "mock_alchemy"
-python_versions = ["3.9", "3.8", "3.7"]
-sqlalchemy_versions = ["1.3.22", "1.4.0"]
+python_versions = ["3.7", "3.8", "3.9", "3.10", "3.11"]
+sqlalchemy_versions = ["1.3.22", "1.4.0", "2.0.4"]
 nox.options.sessions = (
     "pre-commit",
     "safety",

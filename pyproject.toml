@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mock-alchemy"
-version = "0.2.5"
+version = "0.2.6"
 description = "SQLAlchemy mock helpers."
 license = "MIT"
 homepage = "https://github.com/rajivsarvepalli/mock-alchemy"
@@ -18,6 +18,8 @@ classifiers=[
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Development Status :: 2 - Pre-Alpha",
 ]
 
@@ -26,7 +28,7 @@ Changelog = "https://github.com/rajivsarvepalli/mock-alchemy/releases"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-SQLAlchemy = "^1.3.22"
+SQLAlchemy = "^2.0.6"
 
 
 [tool.poetry.dev-dependencies]

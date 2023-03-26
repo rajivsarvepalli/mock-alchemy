@@ -452,16 +452,20 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         "update": lambda x, *args, **kwargs: None,
     }
     unify: Dict[str, Optional[UnorderedCall]] = {
-        "query": None,
         "add_columns": None,
-        "join": None,
-        "options": None,
-        "group_by": None,
+        "distinct": None,
+        "execute": None,
         "filter": UnorderedCall,
         "filter_by": UnorderedCall,
+        "group_by": None,
+        "join": None,
+        "offset": None,
+        "options": None,
         "order_by": None,
         "limit": None,
-        "distinct": None,
+        "query": None,
+        "scalars": None,
+        "where": None,
     }
 
     mutate: Set[str] = {"add", "add_all", "delete"}
@@ -595,7 +599,9 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             ]
             sorted_mock_data = sorted(_mock_data, key=lambda x: len(x[0]), reverse=True)
             if _mock_name == "get":
-                query_call = [c for c in previous_calls if c[0] == "query"][0]
+                query_call = [
+                    c for c in previous_calls if c[0] in ["query", "execute"]
+                ][0]
                 results = list(
                     chain(
                         *[
