@@ -125,6 +125,7 @@ def sqlalchemy_call(call: Call, with_name: bool = False, base_call: Any = Call) 
     else:
         return base_call((args, kwargs), two=True)
 
+
 class AlchemyMagicMock(mock.MagicMock):
     """Compares SQLAlchemy expressions for simple asserts.
 
@@ -154,6 +155,7 @@ class AlchemyMagicMock(mock.MagicMock):
         Actual: filter(BinaryExpression(sql='"column" = :column_1', \
         params={'column_1': 5}))
     """
+
     @overload
     def __init__(
         self,
@@ -422,6 +424,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
     After ``.all()`` is called or query is iterated over, future queries
     are not unified.
     """
+
     boundary: Dict[str, Callable] = {
         "all": lambda x: x,
         "__iter__": lambda x: iter(x),
@@ -596,7 +599,9 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             ]
             sorted_mock_data = sorted(_mock_data, key=lambda x: len(x[0]), reverse=True)
             if _mock_name == "get":
-                query_call = [c for c in previous_calls if c[0] in ["query", "execute"]][0]
+                query_call = [
+                    c for c in previous_calls if c[0] in ["query", "execute"]
+                ][0]
                 results = list(
                     chain(
                         *[
