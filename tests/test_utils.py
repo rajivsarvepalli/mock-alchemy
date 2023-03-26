@@ -21,7 +21,7 @@ def test_match_type() -> None:
     """Tests matching string type."""
     assert type(match_type(b"hello", bytes)) is bytes
     assert type(match_type(b"hello", str)) is str
-    assert type(match_type(u"hello", bytes)) is bytes
+    assert type(match_type("hello", bytes)) is bytes
     assert type(match_type(b"hello", str)) is str
 
 
