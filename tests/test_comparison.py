@@ -1,7 +1,10 @@
 """Testing the module for comparison in mock-alchemy."""
 from unittest import mock
 
+import sqlalchemy
+from pkg_resources import packaging
 from sqlalchemy import func
+from sqlalchemy import select
 from sqlalchemy.sql.expression import column
 
 from mock_alchemy.comparison import ExpressionMatcher
@@ -48,3 +51,14 @@ def test_expression_matcher() -> None:
     assert ExpressionMatcher(column("column") == "one") != ExpressionMatcher(
         column("column") == "three"
     )
+    if packaging.version.parse(sqlalchemy.__version__) >= packaging.version.parse(
+        "1.4.47"
+    ):
+        e6 = select(c)
+        e7 = select(c)
+        e8 = select(1)
+        e9 = select(2)
+        assert ExpressionMatcher(e6) == e7
+        assert ExpressionMatcher(e6) != e8
+        assert ExpressionMatcher(e6) != e9
+        assert ExpressionMatcher(e8) != e9
