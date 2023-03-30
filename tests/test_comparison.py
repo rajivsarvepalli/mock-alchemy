@@ -2,7 +2,7 @@
 from unittest import mock
 
 import sqlalchemy
-from pkg_resources import packaging
+from packaging import version
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.sql.expression import column
@@ -51,9 +51,7 @@ def test_expression_matcher() -> None:
     assert ExpressionMatcher(column("column") == "one") != ExpressionMatcher(
         column("column") == "three"
     )
-    if packaging.version.parse(sqlalchemy.__version__) >= packaging.version.parse(
-        "1.4.47"
-    ):
+    if version.parse(sqlalchemy.__version__) >= version.parse("1.4.47"):
         e6 = select(c)
         e7 = select(c)
         e8 = select(1)

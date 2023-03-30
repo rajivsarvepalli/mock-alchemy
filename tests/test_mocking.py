@@ -5,7 +5,7 @@ from unittest import mock
 
 import pytest
 import sqlalchemy
-from pkg_resources import packaging
+from packaging import version
 from sqlalchemy import or_
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.sql.expression import column
@@ -22,7 +22,7 @@ from .common import Data
 from .common import Model
 from .common import SomeClass
 
-if packaging.version.parse(sqlalchemy.__version__) >= packaging.version.parse("1.4.47"):
+if version.parse(sqlalchemy.__version__) >= version.parse("1.4.47"):
     from sqlalchemy.orm import declarative_base
 else:
     from sqlalchemy.ext.declarative import declarative_base

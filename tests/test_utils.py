@@ -1,7 +1,7 @@
 """Testing the module for utils in mock-alchemy."""
 import pytest
 import sqlalchemy
-from pkg_resources import packaging
+from packaging import version
 from sqlalchemy.orm.exc import MultipleResultsFound
 
 from mock_alchemy.utils import build_identity_map
@@ -15,7 +15,7 @@ from mock_alchemy.utils import setattr_tmp
 
 from .common import SomeClass
 
-if packaging.version.parse(sqlalchemy.__version__) >= packaging.version.parse("1.4.47"):
+if version.parse(sqlalchemy.__version__) >= version.parse("1.4.47"):
     from sqlalchemy.orm import declarative_base
 else:
     from sqlalchemy.ext.declarative import declarative_base

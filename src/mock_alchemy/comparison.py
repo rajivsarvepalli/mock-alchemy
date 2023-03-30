@@ -11,7 +11,7 @@ from typing import Optional
 from unittest import mock
 
 import sqlalchemy
-from pkg_resources import packaging
+from packaging import version
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.sql.expression import column
@@ -31,7 +31,7 @@ ALCHEMY_TYPES = (
     ALCHEMY_FUNC_TYPE,
     ALCHEMY_LABEL_TYPE,
 )
-if packaging.version.parse(sqlalchemy.__version__) >= packaging.version.parse("1.4.47"):
+if version.parse(sqlalchemy.__version__) >= version.parse("1.4.47"):
     ALCHEMY_SELECT_TYPE = type(select(column("")))
     ALCHEMY_TYPES += (ALCHEMY_SELECT_TYPE,)
 
