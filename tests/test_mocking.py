@@ -4,8 +4,6 @@ from __future__ import annotations
 from unittest import mock
 
 import pytest
-import sqlalchemy
-from packaging import version
 from sqlalchemy import or_
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.sql.expression import column
@@ -16,16 +14,12 @@ from mock_alchemy.mocking import UnifiedAlchemyMagicMock
 from mock_alchemy.mocking import UnorderedCall
 from mock_alchemy.mocking import UnorderedTuple
 from mock_alchemy.mocking import sqlalchemy_call
+from mock_alchemy.sql_alchemy_imports import declarative_base
 
 from .common import Concrete
 from .common import Data
 from .common import Model
 from .common import SomeClass
-
-if version.parse(sqlalchemy.__version__) >= version.parse("1.4.47"):
-    from sqlalchemy.orm import declarative_base
-else:
-    from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 

@@ -31,7 +31,7 @@ ALCHEMY_TYPES = (
     ALCHEMY_FUNC_TYPE,
     ALCHEMY_LABEL_TYPE,
 )
-if version.parse(sqlalchemy.__version__) >= version.parse("1.4.47"):
+if version.parse(sqlalchemy.__version__) >= version.parse("1.4.0"):
     ALCHEMY_SELECT_TYPE = type(select(column("")))
     ALCHEMY_TYPES += (ALCHEMY_SELECT_TYPE,)
 

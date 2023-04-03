@@ -1,9 +1,8 @@
 """Testing the module for utils in mock-alchemy."""
 import pytest
-import sqlalchemy
-from packaging import version
 from sqlalchemy.orm.exc import MultipleResultsFound
 
+from mock_alchemy.sql_alchemy_imports import declarative_base
 from mock_alchemy.utils import build_identity_map
 from mock_alchemy.utils import copy_and_update
 from mock_alchemy.utils import get_item_attr
@@ -14,11 +13,6 @@ from mock_alchemy.utils import raiser
 from mock_alchemy.utils import setattr_tmp
 
 from .common import SomeClass
-
-if version.parse(sqlalchemy.__version__) >= version.parse("1.4.47"):
-    from sqlalchemy.orm import declarative_base
-else:
-    from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 

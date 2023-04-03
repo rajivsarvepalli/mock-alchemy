@@ -8,3 +8,4 @@ import-order-style = pep8
 docstring-convention = google
 per-file-ignores =
     tests/*:S101,I202
+    src/mock_alchemy/sql_alchemy_imports.py:F401

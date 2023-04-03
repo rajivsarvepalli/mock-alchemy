@@ -3,17 +3,12 @@ from __future__ import annotations
 
 from typing import Any
 
-import sqlalchemy
-from packaging import version
 from sqlalchemy import Column
 from sqlalchemy import Float
 from sqlalchemy import Integer
 from sqlalchemy import String
 
-if version.parse(sqlalchemy.__version__) >= version.parse("1.4.47"):
-    from sqlalchemy.orm import declarative_base
-else:
-    from sqlalchemy.ext.declarative import declarative_base
+from mock_alchemy.sql_alchemy_imports import declarative_base
 
 Base = declarative_base()
 
