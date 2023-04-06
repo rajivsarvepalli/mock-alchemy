@@ -10,7 +10,10 @@ from typing import Any
 from typing import Optional
 from unittest import mock
 
+import sqlalchemy
+from packaging import version
 from sqlalchemy import func
+from sqlalchemy import select
 from sqlalchemy.sql.expression import column
 from sqlalchemy.sql.expression import or_
 
@@ -28,6 +31,9 @@ ALCHEMY_TYPES = (
     ALCHEMY_FUNC_TYPE,
     ALCHEMY_LABEL_TYPE,
 )
+if version.parse(sqlalchemy.__version__) >= version.parse("1.4.0"):
+    ALCHEMY_SELECT_TYPE = type(select(column("")))
+    ALCHEMY_TYPES += (ALCHEMY_SELECT_TYPE,)
 
 
 class PrettyExpression(object):

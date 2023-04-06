@@ -27,6 +27,7 @@ classifiers=[
 Changelog = "https://github.com/rajivsarvepalli/mock-alchemy/releases"
 
 [tool.poetry.dependencies]
+packaging = "^23.0"
 python = "^3.7"
 SQLAlchemy = "^2.0.6"
 

@@ -1,8 +1,8 @@
 """Testing the module for utils in mock-alchemy."""
 import pytest
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.exc import MultipleResultsFound
 
+from mock_alchemy.sql_alchemy_imports import declarative_base
 from mock_alchemy.utils import build_identity_map
 from mock_alchemy.utils import copy_and_update
 from mock_alchemy.utils import get_item_attr

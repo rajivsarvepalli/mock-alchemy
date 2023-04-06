@@ -5,7 +5,6 @@ from unittest import mock
 
 import pytest
 from sqlalchemy import or_
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.sql.expression import column
 
@@ -15,6 +14,7 @@ from mock_alchemy.mocking import UnifiedAlchemyMagicMock
 from mock_alchemy.mocking import UnorderedCall
 from mock_alchemy.mocking import UnorderedTuple
 from mock_alchemy.mocking import sqlalchemy_call
+from mock_alchemy.sql_alchemy_imports import declarative_base
 
 from .common import Concrete
 from .common import Data
