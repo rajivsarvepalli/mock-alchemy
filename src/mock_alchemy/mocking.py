@@ -21,6 +21,9 @@ from sqlalchemy import select
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql.dml import Delete
+from sqlalchemy.sql.dml import Insert
+from sqlalchemy.sql.dml import Update
 
 from .comparison import ExpressionMatcher
 from .utils import build_identity_map
@@ -705,7 +708,6 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             _kwargs = kwargs.copy()
             # Need to check if the execute was an insert, update or delete. Ignore any other types
             execute_statement = args[0]
-            from sqlalchemy.sql.dml import Insert, Update, Delete
 
             if isinstance(execute_statement, Insert):
                 # Add insert data
@@ -726,6 +728,16 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                 else:
                     # insert a boundary so that this is no longer part of a unified call.
                     self.all()
+            elif isinstance(execute_statement, Delete):
+                # insert a boundary so that this is no longer part of a unified call.
+                self.all()
+                # todo - returned value should have a .rowcount attribute with number of deleted rows
+                pass
+            elif isinstance(execute_statement, Update):
+                # insert a boundary so that this is no longer part of a unified call.
+                self.all()
+                # todo - returned value should have a .rowcount attribute with number of updated rows
+                pass    
             else:
                 # assume any other execute types need to unify
                 return self._unify(self, *args, **kwargs)
