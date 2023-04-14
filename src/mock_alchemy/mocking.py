@@ -677,9 +677,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             _mock_data = self._mock_data
             num_deleted = 0
             previous_calls = [
-                sqlalchemy_call(
-                    i, with_name=True, base_call=self.unify.get(i[0]) or Call
-                )
+                sqlalchemy_call(i, with_name=True, base_call=self.unify.get(i[0]) or Call)
                 for i in self._get_previous_calls(self.mock_calls[:-1])
             ]
             sorted_mock_data = sorted(_mock_data, key=lambda x: len(x[0]), reverse=True)
@@ -722,6 +720,12 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                     values = execute_statement._multi_values[0]
                     for i in values:
                         self._mutate_data(table_type(**{k.name: v for k, v in i.items()}), **_kwargs)
-
-            # execute can both modify data and be part of a unified call, so also call unify with args
-            return self._unify(self, *args, **kwargs)
+                # Only unify if the insert statement is returning
+                if execute_statement._returning:
+                    return self._unify(self, *args, **kwargs)
+                else:
+                    # insert a boundary so that this is no longer part of a unified call.
+                    self.all()
+            else:
+                # assume any other execute types need to unify
+                return self._unify(self, *args, **kwargs)
