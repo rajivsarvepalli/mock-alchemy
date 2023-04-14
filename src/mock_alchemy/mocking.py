@@ -470,7 +470,9 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         "where": None,
     }
 
-    mutate: Set[str] = {"add", "add_all", "delete"}
+    mutate: Set[str] = {"add", "add_all", "delete", "execute"}
+
+    mutate_and_unify: Set[str] = {"execute"}
 
     @overload
     def __init__(
@@ -493,12 +495,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         """Creates an UnifiedAlchemyMagicMock to mock a SQLAlchemy session."""
         kwargs["_mock_default"] = kwargs.pop("default", [])
         kwargs["_mock_data"] = kwargs.pop("data", None)
-        kwargs.update(
-            {
-                k: AlchemyMagicMock(side_effect=partial(self._get_data, _mock_name=k))
-                for k in self.boundary
-            }
-        )
+        kwargs.update({k: AlchemyMagicMock(side_effect=partial(self._get_data, _mock_name=k)) for k in self.boundary})
 
         kwargs.update(
             {
@@ -517,6 +514,16 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                     side_effect=partial(self._mutate_data, _mock_name=k),
                 )
                 for k in self.mutate
+            }
+        )
+
+        kwargs.update(
+            {
+                k: AlchemyMagicMock(
+                    return_value=self,
+                    side_effect=partial(self._mutate_data, _mock_name=k),
+                )
+                for k in self.mutate_and_unify
             }
         )
 
@@ -594,25 +601,13 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         _mock_data = self._mock_data
         if _mock_data is not None:
             previous_calls = [
-                sqlalchemy_call(
-                    i, with_name=True, base_call=self.unify.get(i[0]) or Call
-                )
+                sqlalchemy_call(i, with_name=True, base_call=self.unify.get(i[0]) or Call)
                 for i in self._get_previous_calls(self.mock_calls[:-1])
             ]
             sorted_mock_data = sorted(_mock_data, key=lambda x: len(x[0]), reverse=True)
             if _mock_name == "get":
-                query_call = [
-                    c for c in previous_calls if c[0] in ["query", "execute"]
-                ][0]
-                results = list(
-                    chain(
-                        *[
-                            result
-                            for calls, result in sorted_mock_data
-                            if query_call in calls
-                        ]
-                    )
-                )
+                query_call = [c for c in previous_calls if c[0] in ["query", "execute"]][0]
+                results = list(chain(*[result for calls, result in sorted_mock_data if query_call in calls]))
                 return self.boundary[_mock_name](results, *args, **kwargs)
 
             else:
@@ -638,9 +633,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             to_add = args[0]
             query_call = mock.call.query(type(to_add))
 
-            mocked_data = next(
-                iter(filter(lambda i: i[0] == [query_call], _mock_data)), None
-            )
+            mocked_data = next(iter(filter(lambda i: i[0] == [query_call], _mock_data)), None)
             if mocked_data:
                 mocked_data[1].append(to_add)
             else:
@@ -676,8 +669,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
             for i in to_add:
                 self._mutate_data(i, *args[1:], **_kwargs)
-        # delete case
-        else:
+        elif _mock_name == "delete":
             _kwargs = kwargs.copy()
             # pretend like all is being called to get data
             _kwargs["_mock_name"] = "all"
@@ -710,3 +702,26 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                     temp_mock_data.append((calls, result))
             self._mock_data = temp_mock_data
             return num_deleted
+        # execute case
+        else:
+            _kwargs = kwargs.copy()
+            # Need to check if the execute was an insert, update or delete. Ignore any other types
+            execute_statement = args[0]
+            from sqlalchemy.sql.dml import Insert, Update, Delete
+
+            if isinstance(execute_statement, Insert):
+                # Add insert data
+                _kwargs["_mock_name"] = "add"
+                table_type = execute_statement.entity_description["type"]
+                # Values should either be a list of dictionaries ar arg[1] or a list of dictionaries as values.
+                if len(args) > 1:
+                    for i in args[1]:
+                        self._mutate_data(table_type(**i), **_kwargs)
+                else:
+                    # Values will be stored within _multi_values list
+                    values = execute_statement._multi_values[0]
+                    for i in values:
+                        self._mutate_data(table_type(**{k.name: v for k, v in i.items()}), **_kwargs)
+
+            # execute can both modify data and be part of a unified call, so also call unify with args
+            return self._unify(self, *args, **kwargs)
