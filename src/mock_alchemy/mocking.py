@@ -17,6 +17,8 @@ from typing import Set
 from typing import overload
 from unittest import mock
 
+from sqlalchemy import select
+from sqlalchemy.exc import ArgumentError
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -643,6 +645,29 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                 mocked_data[1].append(to_add)
             else:
                 _mock_data.append(([query_call], [to_add]))
+
+            try:
+                execute_call = mock.call.execute(select(type(to_add)))
+
+                execute_mocked_data = next(
+                    iter(
+                        filter(
+                            lambda i: i[0] == [ExpressionMatcher(execute_call)],
+                            _mock_data,
+                        )
+                    ),
+                    None,
+                )
+                if execute_mocked_data:
+                    execute_mocked_data[1].append(to_add)
+                else:
+                    _mock_data.append(([execute_call], [to_add]))
+            except (TypeError, ArgumentError):
+                # TypeError indicates an old version of sqlalcemy that does not support
+                # executing select(table) statements.
+                # ArgumentError indicates a mocked table that cannot be selected, so
+                # cannot be mocked this way.
+                pass
 
         elif _mock_name == "add_all":
             to_add = args[0]
