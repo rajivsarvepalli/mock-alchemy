@@ -12,10 +12,13 @@ from unittest import mock
 
 import sqlalchemy
 from packaging import version
+from sqlalchemy import delete
 from sqlalchemy import func
 from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.sql.expression import column
 from sqlalchemy.sql.expression import or_
+from sqlalchemy.sql.expression import table
 
 from .utils import match_type
 
@@ -33,7 +36,13 @@ ALCHEMY_TYPES = (
 )
 if version.parse(sqlalchemy.__version__) >= version.parse("1.4.0"):
     ALCHEMY_SELECT_TYPE = type(select(column("")))
-    ALCHEMY_TYPES += (ALCHEMY_SELECT_TYPE,)
+    ALCHEMY_UPDATE_TYPE = type(update(table("")))
+    ALCHEMY_DELETE_TYPE = type(delete(table("")))
+    ALCHEMY_TYPES += (
+        ALCHEMY_SELECT_TYPE,
+        ALCHEMY_UPDATE_TYPE,
+        ALCHEMY_DELETE_TYPE,
+    )
 
 
 class PrettyExpression(object):
