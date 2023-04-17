@@ -13,8 +13,8 @@ from unittest import mock
 import sqlalchemy
 from packaging import version
 from sqlalchemy import delete
-from sqlalchemy import insert
 from sqlalchemy import func
+from sqlalchemy import insert
 from sqlalchemy import select
 from sqlalchemy import update
 from sqlalchemy.sql.expression import column

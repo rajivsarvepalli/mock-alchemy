@@ -498,7 +498,12 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         """Creates an UnifiedAlchemyMagicMock to mock a SQLAlchemy session."""
         kwargs["_mock_default"] = kwargs.pop("default", [])
         kwargs["_mock_data"] = kwargs.pop("data", None)
-        kwargs.update({k: AlchemyMagicMock(side_effect=partial(self._get_data, _mock_name=k)) for k in self.boundary})
+        kwargs.update(
+            {
+                k: AlchemyMagicMock(side_effect=partial(self._get_data, _mock_name=k))
+                for k in self.boundary
+            }
+        )
 
         kwargs.update(
             {
@@ -604,13 +609,25 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         _mock_data = self._mock_data
         if _mock_data is not None:
             previous_calls = [
-                sqlalchemy_call(i, with_name=True, base_call=self.unify.get(i[0]) or Call)
+                sqlalchemy_call(
+                    i, with_name=True, base_call=self.unify.get(i[0]) or Call
+                )
                 for i in self._get_previous_calls(self.mock_calls[:-1])
             ]
             sorted_mock_data = sorted(_mock_data, key=lambda x: len(x[0]), reverse=True)
             if _mock_name == "get":
-                query_call = [c for c in previous_calls if c[0] in ["query", "execute"]][0]
-                results = list(chain(*[result for calls, result in sorted_mock_data if query_call in calls]))
+                query_call = [
+                    c for c in previous_calls if c[0] in ["query", "execute"]
+                ][0]
+                results = list(
+                    chain(
+                        *[
+                            result
+                            for calls, result in sorted_mock_data
+                            if query_call in calls
+                        ]
+                    )
+                )
                 return self.boundary[_mock_name](results, *args, **kwargs)
 
             else:
@@ -636,7 +653,9 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             to_add = args[0]
             query_call = mock.call.query(type(to_add))
 
-            mocked_data = next(iter(filter(lambda i: i[0] == [query_call], _mock_data)), None)
+            mocked_data = next(
+                iter(filter(lambda i: i[0] == [query_call], _mock_data)), None
+            )
             if mocked_data:
                 mocked_data[1].append(to_add)
             else:
@@ -680,7 +699,9 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             _mock_data = self._mock_data
             num_deleted = 0
             previous_calls = [
-                sqlalchemy_call(i, with_name=True, base_call=self.unify.get(i[0]) or Call)
+                sqlalchemy_call(
+                    i, with_name=True, base_call=self.unify.get(i[0]) or Call
+                )
                 for i in self._get_previous_calls(self.mock_calls[:-1])
             ]
             sorted_mock_data = sorted(_mock_data, key=lambda x: len(x[0]), reverse=True)
@@ -706,14 +727,16 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         # execute case
         else:
             _kwargs = kwargs.copy()
-            # Need to check if the execute was an insert, update or delete. Ignore any other types
+            # Need to check if the execute was an insert, update or delete. Ignore any
+            # other types
             execute_statement = args[0]
 
             if isinstance(execute_statement, Insert):
                 # Add insert data
                 _kwargs["_mock_name"] = "add"
                 table_type = execute_statement.entity_description["type"]
-                # Values should either be a list of dictionaries ar arg[1] or a list of dictionaries as values.
+                # Values should either be a list of dictionaries ar arg[1] or a list of
+                # dictionaries as values.
                 if len(args) > 1:
                     for i in args[1]:
                         self._mutate_data(table_type(**i), **_kwargs)
@@ -721,23 +744,95 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                     # Values will be stored within _multi_values list
                     values = execute_statement._multi_values[0]
                     for i in values:
-                        self._mutate_data(table_type(**{k.name: v for k, v in i.items()}), **_kwargs)
+                        self._mutate_data(
+                            table_type(**{k.name: v for k, v in i.items()}), **_kwargs
+                        )
                 # Only unify if the insert statement is returning
                 if execute_statement._returning:
                     return self._unify(self, *args, **kwargs)
                 else:
-                    # insert a boundary so that this is no longer part of a unified call.
+                    # insert a boundary so that this is no longer part of a unified
+                    # call.
                     self.all()
             elif isinstance(execute_statement, Delete):
+                # Create equivalent select statement as an Expression Matcher
+                select_statement = [
+                    ExpressionMatcher(
+                        mock.call.execute(
+                            select(execute_statement.table).where(
+                                execute_statement.whereclause
+                            )
+                        )
+                    )
+                ]
+                _mock_data = self._mock_data
+                sorted_mock_data = sorted(
+                    _mock_data, key=lambda x: len(x[0]), reverse=True
+                )
+                temp_mock_data = list()
+                found_query = False
+                for calls, result in sorted_mock_data:
+                    calls = [
+                        sqlalchemy_call(
+                            i,
+                            with_name=True,
+                            base_call=self.unify.get(i[0]) or Call,
+                        )
+                        for i in calls
+                    ]
+                    if all(c in select_statement for c in calls) and not found_query:
+                        num_deleted = len(result)
+                        temp_mock_data.append((calls, []))
+                        found_query = True
+                    else:
+                        temp_mock_data.append((calls, result))
+                self._mock_data = temp_mock_data
+                delete_result = mock.Mock()
+                delete_result.rowcount = num_deleted
                 # insert a boundary so that this is no longer part of a unified call.
                 self.all()
-                # todo - returned value should have a .rowcount attribute with number of deleted rows
-                pass
+                return delete_result
             elif isinstance(execute_statement, Update):
+                # Create equivalent select statement as an Expression Matcher
+                select_statement = [
+                    ExpressionMatcher(
+                        mock.call.execute(
+                            select(execute_statement.table).where(
+                                execute_statement.whereclause
+                            )
+                        )
+                    )
+                ]
+                _mock_data = self._mock_data
+                sorted_mock_data = sorted(
+                    _mock_data, key=lambda x: len(x[0]), reverse=True
+                )
+                temp_mock_data = list()
+                found_query = False
+                for calls, result in sorted_mock_data:
+                    calls = [
+                        sqlalchemy_call(
+                            i,
+                            with_name=True,
+                            base_call=self.unify.get(i[0]) or Call,
+                        )
+                        for i in calls
+                    ]
+                    if all(c in select_statement for c in calls) and not found_query:
+                        num_updated = len(result)
+                        for r in result:
+                            for k, v in execute_statement._values.items():
+                                setattr(r, k.name, v.value)
+                        temp_mock_data.append((calls, result))
+                        found_query = True
+                    else:
+                        temp_mock_data.append((calls, result))
+                self._mock_data = temp_mock_data
+                update_result = mock.Mock()
+                update_result.rowcount = num_updated
                 # insert a boundary so that this is no longer part of a unified call.
                 self.all()
-                # todo - returned value should have a .rowcount attribute with number of updated rows
-                pass    
+                return update_result
             else:
                 # assume any other execute types need to unify
                 return self._unify(self, *args, **kwargs)
