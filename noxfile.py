@@ -72,7 +72,7 @@ def activate_virtualenv_in_precommit_hooks(session: Session) -> None:
         hook.write_text("\n".join(lines))
 
 
-@session(name="pre-commit", python="3.11")
+@session(name="pre-commit", python="3.8")
 def precommit(session: Session) -> None:
     """Lint using pre-commit."""
     args = session.posargs or ["run", "--all-files"]
@@ -104,7 +104,7 @@ def safety(session: Session) -> None:
     session.run("safety", "check", f"--file={requirements}", "--bare")
 
 
-@session(python="3.11")
+@session(python=python_versions)
 def mypy(session: Session) -> None:
     """Type-check using mypy."""
     args = session.posargs or ["src", "tests", "docs/conf.py"]
@@ -115,7 +115,7 @@ def mypy(session: Session) -> None:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
 
 
-@session(python="3.11")
+@session(python=python_versions)
 @nox.parametrize("sqlalchemy", sqlalchemy_versions)
 def tests(session: Session, sqlalchemy: str) -> None:
     """Run the test suite."""
