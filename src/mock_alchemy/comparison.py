@@ -10,8 +10,8 @@ from typing import Any
 from typing import Optional
 from unittest import mock
 
-import sqlalchemy
 from packaging import version
+from sqlalchemy import __version__ as sqlalchemy_version
 from sqlalchemy import delete
 from sqlalchemy import func
 from sqlalchemy import insert
@@ -35,7 +35,7 @@ ALCHEMY_TYPES = (
     ALCHEMY_FUNC_TYPE,
     ALCHEMY_LABEL_TYPE,
 )
-if version.parse(sqlalchemy.__version__) >= version.parse("1.4.0"):
+if version.parse(sqlalchemy_version) >= version.parse("1.4.0"):
     ALCHEMY_SELECT_TYPE = type(select(column("")))
     ALCHEMY_UPDATE_TYPE = type(update(table("")))
     ALCHEMY_DELETE_TYPE = type(delete(table("")))
