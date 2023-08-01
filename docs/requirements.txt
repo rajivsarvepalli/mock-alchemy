@@ -1,4 +1,4 @@
-sphinx==7.0.1
+sphinx==7.1.1
 sphinx-autobuild==2021.3.14
 sphinx-autodoc-typehints==1.22
 sphinx-copybutton==0.5.1
