@@ -17,8 +17,14 @@ from typing import Set
 from typing import overload
 from unittest import mock
 
+from packaging import version
+from sqlalchemy import __version__ as sqlalchemy_version
+from sqlalchemy import select
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql.dml import Delete
+from sqlalchemy.sql.dml import Insert
+from sqlalchemy.sql.dml import Update
 
 from .comparison import ExpressionMatcher
 from .utils import build_identity_map
@@ -454,7 +460,6 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
     unify: Dict[str, Optional[UnorderedCall]] = {
         "add_columns": None,
         "distinct": None,
-        "execute": None,
         "filter": UnorderedCall,
         "filter_by": UnorderedCall,
         "group_by": None,
@@ -469,6 +474,8 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
     }
 
     mutate: Set[str] = {"add", "add_all", "delete"}
+
+    execute_statement: Set[str] = {"execute"}
 
     @overload
     def __init__(
@@ -515,6 +522,16 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                     side_effect=partial(self._mutate_data, _mock_name=k),
                 )
                 for k in self.mutate
+            }
+        )
+
+        kwargs.update(
+            {
+                k: AlchemyMagicMock(
+                    return_value=self,
+                    side_effect=partial(self._execute_statement, _mock_name=k),
+                )
+                for k in self.execute_statement
             }
         )
 
@@ -644,6 +661,22 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             else:
                 _mock_data.append(([query_call], [to_add]))
 
+            if version.parse(sqlalchemy_version) >= version.parse("1.4.0"):
+                execute_call = mock.call.execute(select(type(to_add)))
+
+                execute_mocked_data = next(
+                    iter(
+                        filter(
+                            lambda i: i[0] == [ExpressionMatcher(execute_call)],
+                            _mock_data,
+                        )
+                    ),
+                    None,
+                )
+                if execute_mocked_data:
+                    execute_mocked_data[1].append(to_add)
+                else:
+                    _mock_data.append(([execute_call], [to_add]))
         elif _mock_name == "add_all":
             to_add = args[0]
             _kwargs = kwargs.copy()
@@ -685,3 +718,134 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
                     temp_mock_data.append((calls, result))
             self._mock_data = temp_mock_data
             return num_deleted
+
+    def _execute_insert(
+        self, execute_statement: Insert, *args: Any, **kwargs: Any
+    ) -> Any:
+        """Insert data from execute statement."""
+        _kwargs = kwargs.copy()
+        execute_statement = args[0]
+        _kwargs["_mock_name"] = "add"
+        table_type = execute_statement.entity_description["type"]
+        # Values should either be a list of dictionaries as arg[1] or a list of
+        # dictionaries as values.
+        if len(args) > 1:
+            for i in args[1]:
+                self._mutate_data(table_type(**i), **_kwargs)
+        else:
+            # Values will be stored within _multi_values list
+            values = execute_statement._multi_values[0]
+            for i in values:
+                self._mutate_data(
+                    table_type(**{k.name: v for k, v in i.items()}), **_kwargs
+                )
+        # insert a boundary so that this is no longer part of a unified call.
+        self.all()
+        # Start a new unify if the insert statement is returning
+        if execute_statement._returning:
+            return self.execute(select(execute_statement._returning[0]))
+        return None
+
+    def _execute_delete(self, execute_statement: Delete, *args: Any) -> mock.Mock:
+        """Delete data according to execute statement."""
+        execute_statement = args[0]
+        # Create equivalent select statement as an Expression Matcher
+        select_statement = (
+            [
+                ExpressionMatcher(
+                    mock.call.execute(
+                        select(execute_statement.table).where(
+                            execute_statement.whereclause
+                        )
+                    )
+                )
+            ]
+            if execute_statement.whereclause is not None
+            else [ExpressionMatcher(mock.call.execute(select(execute_statement.table)))]
+        )
+        _mock_data = self._mock_data = self._mock_data or []
+        sorted_mock_data = sorted(_mock_data, key=lambda x: len(x[0]), reverse=True)
+        temp_mock_data = list()
+        found_query = False
+        num_deleted = 0
+        for calls, result in sorted_mock_data:
+            calls = [
+                sqlalchemy_call(
+                    i,
+                    with_name=True,
+                    base_call=self.unify.get(i[0]) or Call,
+                )
+                for i in calls
+            ]
+            if all(c in select_statement for c in calls) and not found_query:
+                num_deleted = len(result)
+                temp_mock_data.append((calls, []))
+                found_query = True
+            else:
+                temp_mock_data.append((calls, result))
+        self._mock_data = temp_mock_data
+        delete_result = mock.Mock()
+        delete_result.rowcount = num_deleted
+        # insert a boundary so that this is no longer part of a unified call.
+        self.all()
+        return delete_result
+
+    def _execute_update(self, execute_statement: Update) -> mock.Mock:
+        """Update data according to execute statement."""
+        # Create equivalent select statement as an Expression Matcher
+        select_statement = (
+            [
+                ExpressionMatcher(
+                    mock.call.execute(
+                        select(execute_statement.table).where(
+                            execute_statement.whereclause
+                        )
+                    )
+                )
+            ]
+            if execute_statement.whereclause is not None
+            else [ExpressionMatcher(mock.call.execute(select(execute_statement.table)))]
+        )
+        _mock_data = self._mock_data = self._mock_data or []
+        sorted_mock_data = sorted(_mock_data, key=lambda x: len(x[0]), reverse=True)
+        temp_mock_data = list()
+        found_query = False
+        num_updated = 0
+        for calls, result in sorted_mock_data:
+            calls = [
+                sqlalchemy_call(
+                    i,
+                    with_name=True,
+                    base_call=self.unify.get(i[0]) or Call,
+                )
+                for i in calls
+            ]
+            if all(c in select_statement for c in calls) and not found_query:
+                num_updated = len(result)
+                for r in result:
+                    for k, v in execute_statement._values.items():
+                        setattr(r, k.name, v.value)
+                temp_mock_data.append((calls, result))
+                found_query = True
+            else:
+                temp_mock_data.append((calls, result))
+        self._mock_data = temp_mock_data
+        update_result = mock.Mock()
+        update_result.rowcount = num_updated
+        # insert a boundary so that this is no longer part of a unified call.
+        self.all()
+        return update_result
+
+    def _execute_statement(self, *args: Any, **kwargs: Any) -> Any:
+        """Depending on statement being executed, update data and/or unify statement."""
+        # Need to check if the execute was an insert, update or delete.
+        execute_statement = args[0]
+        if isinstance(execute_statement, Insert):
+            return self._execute_insert(execute_statement, *args, **kwargs)
+        elif isinstance(execute_statement, Delete):
+            return self._execute_delete(execute_statement, *args)
+        elif isinstance(execute_statement, Update):
+            return self._execute_update(execute_statement)
+        else:
+            # assume any other execute types need to unify
+            return self._unify(self, *args, **kwargs)

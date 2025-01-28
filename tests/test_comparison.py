@@ -2,8 +2,8 @@
 from unittest import mock
 
 import pytest
-import sqlalchemy
 from packaging import version
+from sqlalchemy import __version__ as sqlalchemy_version
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.sql.expression import column
@@ -55,7 +55,7 @@ def test_expression_matcher() -> None:
 
 
 @pytest.mark.skipif(
-    version.parse(sqlalchemy.__version__) < version.parse("1.4.0"),
+    version.parse(sqlalchemy_version) < version.parse("1.4.0"),
     reason="requires sqlalchemy 1.4.0 or higher to run",
 )
 def test_expression_matcher_select() -> None:
