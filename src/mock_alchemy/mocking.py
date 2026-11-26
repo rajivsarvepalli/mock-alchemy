@@ -210,7 +210,7 @@ class UnifiedAlchemyMappingResult(object):
         if self._keys:
             if isinstance(row, (list, tuple)):
                 if len(self._keys) == len(row):
-                    return dict(zip(self._keys, row))
+                    return dict(zip(self._keys, row, strict=True))
                 return {i: v for i, v in enumerate(row)}
             values = {}
             for key in self._keys:
@@ -1243,7 +1243,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
     @classmethod
     def _row_as_kwargs(
-        cls, row: Mapping, model_type: Optional[Any] = None
+        cls: Any, row: Mapping, model_type: Optional[Any] = None
     ) -> Dict[str, Any]:
         """Convert a DML row mapping into model keyword arguments.
 
@@ -1345,7 +1345,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         }
 
         updated = set()
-        for calls, result in self._mock_data or []:
+        for _calls, result in self._mock_data or []:
             for item in result:
                 if id(item) in updated:
                     continue
@@ -1382,7 +1382,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         whereclause = getattr(statement, "whereclause", None)
 
         deleted = set()
-        for calls, result in self._mock_data or []:
+        for _calls, result in self._mock_data or []:
             remaining = []
             for item in result:
                 if id(item) in deleted:
@@ -1482,7 +1482,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
         if deleted:
             deleted_ids = {id(i) for i in deleted}
-            for calls, result in temp_mock_data:
+            for _calls, result in temp_mock_data:
                 if result:
                     result[:] = [i for i in result if id(i) not in deleted_ids]
 
