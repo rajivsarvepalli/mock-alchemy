@@ -13,16 +13,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { python-version: 3.8, os: ubuntu-latest, session: "pre-commit" }
-          - { python-version: 3.8, os: ubuntu-latest, session: "safety" }
-          - { python-version: 3.9, os: ubuntu-latest, session: "tests" }
-          - { python-version: 3.8, os: ubuntu-latest, session: "tests" }
-          - { python-version: 3.7, os: ubuntu-latest, session: "tests" }
+          - { python-version: 3.8, os: ubuntu-22.04, session: "pre-commit" }
+          - { python-version: 3.8, os: ubuntu-22.04, session: "safety" }
+          - { python-version: 3.9, os: ubuntu-22.04, session: "tests" }
+          - { python-version: 3.8, os: ubuntu-22.04, session: "tests" }
+          - { python-version: 3.7, os: ubuntu-22.04, session: "tests" }
           - { python-version: 3.9, os: windows-latest, session: "tests" }
           - { python-version: 3.9, os: macos-latest, session: "tests" }
-          - { python-version: 3.9, os: ubuntu-latest, session: "typeguard" }
-          - { python-version: 3.9, os: ubuntu-latest, session: "xdoctest" }
-          - { python-version: 3.8, os: ubuntu-latest, session: "docs-build" }
+          - { python-version: 3.9, os: ubuntu-22.04, session: "typeguard" }
+          - { python-version: 3.9, os: ubuntu-22.04, session: "xdoctest" }
+          - { python-version: 3.8, os: ubuntu-22.04, session: "docs-build" }
 
     env:
       NOXSESSION: ${{ matrix.session }}
@@ -102,7 +102,7 @@ jobs:
           if-no-files-found: ignore
 
   coverage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: tests
     steps:
       - name: Check out the repository
