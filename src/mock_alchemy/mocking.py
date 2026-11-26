@@ -10,6 +10,7 @@ from itertools import takewhile
 from typing import Any
 from typing import Callable
 from typing import Dict
+from typing import Generator
 from typing import Iterable
 from typing import Iterator
 from typing import List
@@ -42,6 +43,19 @@ from .utils import raiser
 from .utils import setattr_tmp
 
 Call = type(mock.call)
+
+__all__ = [
+    "AlchemyMagicMock",
+    "UnifiedAlchemyMagicMock",
+    "UnifiedAlchemyMappingResult",
+    "UnifiedAlchemyResult",
+    "UnifiedAlchemyScalarResult",
+    "UnorderedCall",
+    "UnorderedTuple",
+    "sqlalchemy_call",
+]
+
+_DEFAULT_RETURN_VALUE = object()
 
 
 class UnorderedTuple(tuple):
@@ -188,6 +202,11 @@ class UnifiedAlchemyScalarResult(object):
 
     def freeze(self) -> "UnifiedAlchemyScalarResult":
         """Return this result since mocked results are already buffered."""
+        return self
+
+    def __await__(self) -> Generator[Any, None, "UnifiedAlchemyScalarResult"]:
+        """Allow the result to be awaited by async SQLAlchemy sessions."""
+        yield
         return self
 
 
@@ -355,6 +374,11 @@ class UnifiedAlchemyResult(object):
         """Close the result (a no-op for mocked results)."""
         return None
 
+    def __await__(self) -> Generator[Any, None, "UnifiedAlchemyResult"]:
+        """Allow the result to be awaited by async SQLAlchemy sessions."""
+        yield
+        return self
+
     def __iter__(self) -> Iterator[Any]:
         """Iterate over the rows."""
         return iter(self._rows)
@@ -463,6 +487,11 @@ class AlchemyMagicMock(mock.MagicMock):
         name = self._mock_name or "mock"
         args, kwargs = sqlalchemy_call(mock.call(*args, **kwargs))
         return mock._format_call_signature(name, args, kwargs)
+
+    def __await__(self) -> Generator[Any, None, "AlchemyMagicMock"]:
+        """Allow the mock to be awaited in async SQLAlchemy code."""
+        yield
+        return self
 
     def assert_called_with(self, *args: Any, **kwargs: Any) -> None:
         """Assert for a specific call to have happened."""
@@ -700,6 +729,37 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         >>> s.query(SomeClass).scalar()
         None
 
+        Keyword arguments to ``delete`` such as ``synchronize_session`` are
+        accepted but have no impact on mocked data::
+
+        >>> s = UnifiedAlchemyMagicMock()
+        >>> s.add_all([SomeClass(pk1=1, pk2=1), SomeClass(pk1=2, pk2=2)])
+        >>> s.query(SomeClass).delete(synchronize_session=False)
+        2
+        >>> s.query(SomeClass).all()
+        []
+
+        Deleting a model instance directly with ``s.delete(instance)`` is not
+        supported; delete through a query instead.
+
+        SQLAlchemy 2.0 identity lookups work with dynamically added data::
+
+        >>> s = UnifiedAlchemyMagicMock()
+        >>> s.add(Model(pk1=1, name='some_name'))
+        >>> s.get(Model, 1)
+        1
+
+        Explicitly configured mock return values take precedence over mocked
+        data, just like regular mocks::
+
+        >>> s = UnifiedAlchemyMagicMock()
+        >>> s.query.return_value.filter.return_value.first.return_value = 112
+        >>> s.query(SomeClass).filter(SomeClass.pk1 == 1).first()
+        112
+
+        Results returned by ``execute`` and ``scalars`` are awaitable so they
+        can be used in async test cases. See the user guide for an example.
+
     Also note that only within same query functions are unified.
     After ``.all()`` is called or query is iterated over, future queries
     are not unified.
@@ -797,7 +857,10 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         kwargs["_mock_data"] = kwargs.pop("data", None)
         kwargs.update(
             {
-                k: AlchemyMagicMock(side_effect=partial(self._get_data, _mock_name=k))
+                k: AlchemyMagicMock(
+                    return_value=_DEFAULT_RETURN_VALUE,
+                    side_effect=partial(self._get_data, _mock_name=k),
+                )
                 for k in self.boundary
             }
         )
@@ -823,7 +886,8 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         )
 
         kwargs["execute"] = AlchemyMagicMock(
-            side_effect=partial(self._execute, _mock_name="execute")
+            return_value=_DEFAULT_RETURN_VALUE,
+            side_effect=partial(self._execute, _mock_name="execute"),
         )
 
         super(UnifiedAlchemyMagicMock, self).__init__(*args, **kwargs)
@@ -1003,6 +1067,10 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         """Get the data for the SQLAlchemy expression."""
         _mock_name = kwargs.pop("_mock_name")
 
+        configured = getattr(self, _mock_name).return_value
+        if configured is not _DEFAULT_RETURN_VALUE:
+            return configured
+
         statement = None
         if (
             _mock_name in self.scalar_methods
@@ -1014,6 +1082,14 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
 
         if statement is not None:
             return self._get_statement_data(_mock_name, statement, args, kwargs)
+
+        if _mock_name == "get" and args and isinstance(args[0], type):
+            rows = self._find_data(
+                [sqlalchemy_call(mock.call.query(args[0]), with_name=True)]
+            )
+            if rows is None:
+                rows = self._mock_default
+            return self.boundary["get"](rows, *args[1:])
 
         if self._mock_data is None:
             return self.boundary[_mock_name](self._mock_default, *args, **kwargs)
@@ -1408,6 +1484,9 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
             A SQLAlchemy ``Result``-like object.
         """
         kwargs.pop("_mock_name", None)
+        configured = self.execute.return_value
+        if configured is not _DEFAULT_RETURN_VALUE:
+            return configured
         if not args:
             return UnifiedAlchemyResult([])
 

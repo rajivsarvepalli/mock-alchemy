@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
 from types import SimpleNamespace
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -839,3 +841,65 @@ def test_execute_empty_session_and_no_args() -> None:
     session = UnifiedAlchemyMagicMock()
     assert session.execute().all() == []
     assert session.execute(select(Model)).all() == []
+
+
+def test_configured_boundary_return_values_are_respected() -> None:
+    """Tests that explicitly configured mock return values are honored."""
+    session = UnifiedAlchemyMagicMock()
+    session.query.return_value.filter.return_value.first.return_value = 112
+
+    assert session.query(Model).filter(Model.pk1 == 1).first() == 112
+
+
+def test_session_get_with_dynamic_data() -> None:
+    """Tests direct session.get identity lookups for dynamically added rows."""
+    session = UnifiedAlchemyMagicMock()
+    expected = Model(pk1=1, name="one")
+    session.add(expected)
+
+    assert session.get(Model, 1) == expected
+    assert session.get(Model, (1,)) == expected
+    assert session.get(Model, {"pk1": 1}) == expected
+    assert session.get(Model, 2) is None
+    assert session.get(SomeClass, 1) is None
+    assert UnifiedAlchemyMagicMock().get(Model, 1) is None
+
+
+def test_configured_execute_return_value_is_respected() -> None:
+    """Tests that an explicitly configured execute return value is honored."""
+    session = UnifiedAlchemyMagicMock()
+    configured = UnifiedAlchemyResult([(1,)])
+    session.execute.return_value = configured
+
+    assert session.execute(select(Model)) is configured
+
+
+def test_awaitable_alchemy_magic_mock_supports_async_sessions() -> None:
+    """Tests awaiting a plain AlchemyMagicMock session call."""
+    expected = Model(pk1=1, name="one")
+
+    async def run() -> Any:
+        mock_result = AlchemyMagicMock()
+        mock_result.scalars.return_value.first.return_value = expected
+        mock_db = AlchemyMagicMock()
+        mock_db.execute.return_value = mock_result
+
+        result = await mock_db.execute(select(Model))
+        return result.scalars().first()
+
+    assert asyncio.run(run()) is expected
+
+
+def test_awaitable_unified_session_responses() -> None:
+    """Tests awaiting unified execute and scalar result objects."""
+    expected = Model(pk1=1, name="one")
+
+    async def run() -> Any:
+        session = UnifiedAlchemyMagicMock()
+        session.add(expected)
+
+        result = await session.execute(select(Model))
+        scalars = await session.scalars(select(Model))
+        return result.scalars().all(), scalars.all()
+
+    assert asyncio.run(run()) == ([expected], [expected])

@@ -16,7 +16,7 @@ import mock_alchemy
 project = "mock-alchemy"
 author = "Rajiv Sarvepalli"
 copyright = f"{datetime.now().year}, {author}"
-version = "0.2.6"
+version = "0.3.0"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",

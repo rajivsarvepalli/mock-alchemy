@@ -21,6 +21,27 @@ Pip should auto-detect the correct version but this ensures the correct version 
 Quick Examples
 --------------
 
+Imports
+^^^^^^^
+
+Import the mock session classes from ``mock_alchemy.mocking``:
+
+.. code-block:: python
+
+    from mock_alchemy.mocking import AlchemyMagicMock, UnifiedAlchemyMagicMock
+
+The library does not export a declarative ``Base``. Create one with
+``sqlalchemy.orm.declarative_base`` (or use an existing model base):
+
+.. code-block:: python
+
+    from sqlalchemy.orm import declarative_base
+
+    Base = declarative_base()
+
+In particular, ``from mock_alchemy.mocking import Base`` is not valid; only the
+mock session classes are provided by that module.
+
 ExpressionMatcher
 ^^^^^^^^^^^^^^^^^
 
@@ -267,6 +288,72 @@ data::
         MyModel(id=1, name="baz")
     ]
 
+Identity lookups use ``Session.get`` and work with dynamically added data:
+
+.. code-block:: python
+
+    found = session.get(MyModel, 1)
+    assert found.name == "baz"
+
+
+Async Sessions
+++++++++++++++
+
+Results returned by ``execute`` and ``scalars`` are awaitable, so they can be
+used in async test cases without an actual async database driver. Async tests
+can use either the unified mock or a plain ``AlchemyMagicMock`` for stubbed
+calls.
+
+.. code-block:: python
+
+    import asyncio
+    from sqlalchemy import select
+    from mock_alchemy.mocking import AlchemyMagicMock, UnifiedAlchemyMagicMock
+
+    async def count_models() -> int:
+        session = UnifiedAlchemyMagicMock()
+        session.add(MyModel(id=1, name="foo"))
+        result = await session.execute(select(MyModel))
+        scalars = await session.scalars(select(MyModel))
+        return len(result.scalars().all()) + len(scalars.all())
+
+    assert asyncio.run(count_models()) == 2
+
+    async def find_stubbed_model() -> MyModel:
+        expected = MyModel(id=1, name="foo")
+        mock_result = AlchemyMagicMock()
+        mock_result.scalars.return_value.first.return_value = expected
+        mock_db = AlchemyMagicMock()
+        mock_db.execute.return_value = mock_result
+
+        result = await mock_db.execute(select(MyModel))
+        return result.scalars().first()
+
+    assert asyncio.run(find_stubbed_model()) is not None
+
+
+SQLModel
+++++++++
+
+SQLModel table models are SQLAlchemy models, so they work directly with the
+same mock session APIs.
+
+.. code-block:: python
+
+    from sqlmodel import Field, SQLModel, select
+    from mock_alchemy.mocking import UnifiedAlchemyMagicMock
+
+    class Hero(SQLModel, table=True):
+        id: int = Field(primary_key=True)
+        name: str
+
+    session = UnifiedAlchemyMagicMock()
+    session.add(Hero(id=1, name="foo"))
+
+    assert session.query(Hero).all()[0].name == "foo"
+    assert session.execute(select(Hero)).scalars().all()[0].name == "foo"
+    assert session.get(Hero, 1).name == "foo"
+
 
 Deleting in Sessions
 ++++++++++++++++++++
@@ -283,6 +370,16 @@ accessed with ``all`` can also be deleted. For example::
     2
     >>> s.query(SomeClass).all()
     []
+
+Delete keyword arguments, such as ``synchronize_session``, are accepted but
+have no effect on the mocked data:
+
+.. code-block:: python
+
+    s.query(SomeClass).delete(synchronize_session=False)
+
+Deleting a model instance directly with ``s.delete(instance)`` is not supported;
+delete through a query instead.
 
 Dynamic Session Limitation
 ++++++++++++++++++++++++++

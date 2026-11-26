@@ -95,6 +95,21 @@ project. You can find the original package on [PyPi][] and [Github][].
 
 # ⚙ Using
 
+Mock session classes are available from `mock_alchemy.mocking`:
+
+```python
+from mock_alchemy.mocking import AlchemyMagicMock, UnifiedAlchemyMagicMock
+```
+
+The package does not export a declarative `Base`. Define your own base with
+`sqlalchemy.orm.declarative_base`:
+
+```python
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
+```
+
 Normally SQLAlchemy's expressions cannot be easily compared
 as comparison on binary expression produces yet another binary expression:
 
