@@ -28,7 +28,7 @@ Versioning
 ----------
 
 There are several different versions of ``mock-alchemy`` available depending on your needs. The versions ``0.1.x`` are available for use on
-Python 2.7, Python 3.6+. The newer versions serve users who are on Python 3.7+. For people interested in contributing, if you want to work
+Python 2.7, Python 3.6+. The newer versions serve users who are on Python 3.10+. For people interested in contributing, if you want to work
 on Python 2.7 version checkout the branch `0.1.x` and then create pull-requests to that branch. There is a set of specific tests run for that
 branch on pushes and pull-requests since there are different tests for the newer versions of ``mock-alchemy``.
 
@@ -45,7 +45,7 @@ live and patchable.
 Newer Versions
 ^^^^^^^^^^^^^^
 
-These versions support Python 3.7+ and have their development done off the `main branch <https://github.com/rajivsarvepalli/mock-alchemy>`__.
+These versions support Python 3.10+ and have their development done off the `main branch <https://github.com/rajivsarvepalli/mock-alchemy>`__.
 The tests run for them are through ``nox`` and will run on any push or pull request to the main branch. To contribute to this branch, use the information
 below to support your contribution. The :ref:`dependencies <dependencies>` section should give some information about what tools are required for development of :mod:`mock-alchemy`.
 
@@ -88,7 +88,7 @@ The major libraries used are ``tox``, ``flake8``, ``poetry``, and ``pre-commit``
 How to set up your development environment
 ------------------------------------------
 
-You need Python 3.7+ and the following tools:
+You need Python 3.11+ and the following tools:
 
 - Poetry_
 - Nox_
@@ -166,7 +166,7 @@ This will allow a chance to talk it over with the owners and validate your appro
 Future Plans
 ------------
 
-With the upgraded master branch switching to Python 3.7+, and the 0.1.x branch supporting the older version of this package, the plan
+With the upgraded master branch switching to Python 3.10+, and the 0.1.x branch supporting the older version of this package, the plan
 is to continue to modernize this package. Several items are on the list of possible improvements to make:
 
 - Unifying some of the data inside query calls to ensure consistency across mocked filter calls.

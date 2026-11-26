@@ -1,4 +1,5 @@
 """A module for basic mocking of SQLAlchemy sessions and calls."""
+
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -49,10 +50,10 @@ class UnorderedTuple(tuple):
         if len(self) != len(other):
             return False
 
-        other = list(other)
+        remaining = list(other)
         for i in self:
             try:
-                other.remove(i)
+                remaining.remove(i)
             except ValueError:
                 return False
 
@@ -157,7 +158,7 @@ class AlchemyMagicMock(mock.MagicMock):
     """
 
     @overload
-    def __init__(
+    def __init__(  # noqa: E704
         self,
         spec: Optional[Any] = ...,
         side_effect: Optional[Any] = ...,
@@ -170,8 +171,7 @@ class AlchemyMagicMock(mock.MagicMock):
         _new_name: Any = ...,
         _new_parent: Optional[Any] = ...,
         **kwargs: Any,
-    ) -> None:
-        ...  # pragma: no cover
+    ) -> None: ...  # noqa: E704  # pragma: no cover
 
     def __init__(self, *args, **kwargs) -> None:
         """Creates AlchemyMagicMock that can be used as limited SQLAlchemy session."""
@@ -433,19 +433,23 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         "one": lambda x: (
             x[0]
             if len(x) == 1
-            else raiser(MultipleResultsFound, "Multiple rows were found for one()")
-            if x
-            else raiser(NoResultFound, "No row was found for one()")
+            else (
+                raiser(MultipleResultsFound, "Multiple rows were found for one()")
+                if x
+                else raiser(NoResultFound, "No row was found for one()")
+            )
         ),
         "one_or_none": lambda x: (
             x[0]
             if len(x) == 1
-            else raiser(
-                MultipleResultsFound,
-                "Multiple rows were found for one_or_none()",
+            else (
+                raiser(
+                    MultipleResultsFound,
+                    "Multiple rows were found for one_or_none()",
+                )
+                if x
+                else None
             )
-            if x
-            else None
         ),
         "get": lambda x, idmap: get_item_attr(build_identity_map(x), idmap),
         "scalar": lambda x: get_scalar(x),
@@ -471,7 +475,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
     mutate: Set[str] = {"add", "add_all", "delete"}
 
     @overload
-    def __init__(
+    def __init__(  # noqa: E704
         self,
         spec: Optional[Any] = ...,
         side_effect: Optional[Any] = ...,
@@ -484,8 +488,7 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         _new_name: Any = ...,
         _new_parent: Optional[Any] = ...,
         **kwargs: Any,
-    ) -> None:
-        ...  # pragma: no cover
+    ) -> None: ...  # noqa: E704  # pragma: no cover
 
     def __init__(self, *args, **kwargs) -> None:
         """Creates an UnifiedAlchemyMagicMock to mock a SQLAlchemy session."""
@@ -537,15 +540,14 @@ class UnifiedAlchemyMagicMock(AlchemyMagicMock):
         return next(iter(filter(lambda i: i[0] == name, previous_calls)), None)
 
     @overload
-    def _unify(
+    def _unify(  # noqa: E704
         self,
         value: Any = ...,
         name: Optional[Any] = ...,
         parent: Optional[Any] = ...,
         two: bool = ...,
         from_kall: bool = ...,
-    ) -> None:
-        ...  # pragma: no cover
+    ) -> None: ...  # noqa: E704  # pragma: no cover
 
     def _unify(self, *args, **kwargs) -> Any:
         """Unify the SQLAlchemy expressions."""
