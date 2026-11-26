@@ -13,6 +13,7 @@ from unittest import mock
 
 from sqlalchemy import func
 from sqlalchemy import select
+from sqlalchemy.sql.elements import TextClause
 from sqlalchemy.sql.expression import column
 from sqlalchemy.sql.expression import or_
 
@@ -33,6 +34,7 @@ ALCHEMY_TYPES = (
     ALCHEMY_FUNC_TYPE,
     ALCHEMY_LABEL_TYPE,
     ALCHEMY_SELECT_TYPE,
+    TextClause,
 )
 
 

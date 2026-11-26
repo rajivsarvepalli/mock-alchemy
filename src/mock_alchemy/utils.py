@@ -4,8 +4,10 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from collections.abc import Mapping
 from contextlib import contextmanager
 from typing import Any
+from typing import Callable
 from typing import Dict
 from typing import Sequence
 from typing import Tuple
@@ -14,6 +16,13 @@ from typing import Union
 
 from sqlalchemy import inspect
 from sqlalchemy.orm.exc import MultipleResultsFound
+from sqlalchemy.orm.exc import UnmappedColumnError
+from sqlalchemy.sql import operators
+from sqlalchemy.sql.elements import BinaryExpression
+from sqlalchemy.sql.elements import BindParameter
+from sqlalchemy.sql.elements import BooleanClauseList
+from sqlalchemy.sql.elements import Null
+from sqlalchemy.sql.elements import UnaryExpression
 
 
 def match_type(
@@ -265,12 +274,142 @@ def get_item_attr(idmap: Dict, access: Union[Dict, Tuple, Any]) -> Any:
 def get_scalar(rows: Sequence[Any]) -> Any:
     """Utility for mocking sqlalchemy.orm.Query.scalar()."""
     if len(rows) == 1:
+        row = rows[0]
+        if isinstance(row, Mapping):
+            return next(iter(row.values()), None)
         try:
-            return rows[0][0]
-        except TypeError:
-            return rows[0]
+            return row[0]
+        except (TypeError, KeyError, IndexError):
+            return row
     elif len(rows) > 1:
         raise MultipleResultsFound(
             "Multiple rows were found when exactly one was required"
         )
     return None
+
+
+class _MissingValue(object):
+    """Sentinel indicating that a value could not be resolved from a row."""
+
+    def __repr__(self) -> str:
+        """Represent the missing value."""
+        return "<missing>"
+
+
+_MISSING = _MissingValue()
+
+
+def _get_identifier(expression: Any) -> Any:
+    """Get the row attribute name for a SQLAlchemy expression."""
+    return getattr(expression, "key", getattr(expression, "name", None))
+
+
+def _get_expression_value(expression: Any, row: Any) -> Any:
+    """Get the value of a SQLAlchemy expression for a given row.
+
+    Args:
+        expression: The left or right side of a SQLAlchemy expression.
+        row: The object or mapping representing a row.
+
+    Returns:
+        The resolved value or the missing value sentinel.
+    """
+    if expression is None or isinstance(expression, Null):
+        return None
+    if isinstance(expression, BindParameter):
+        return expression.value
+    identifier = _get_identifier(expression)
+    mapper = getattr(type(row), "__mapper__", None)
+    if mapper is not None and hasattr(expression, "table"):
+        try:
+            identifier = mapper.get_property_by_column(expression).key
+        except UnmappedColumnError:
+            pass
+    if identifier is not None:
+        if isinstance(row, Mapping):
+            return row.get(identifier, _MISSING)
+        if hasattr(row, identifier):
+            return getattr(row, identifier)
+        return _MISSING
+    if hasattr(expression, "value"):
+        return expression.value
+    return expression
+
+
+_COMPARISON_FUNCTIONS: Dict[Any, Callable[[Any, Any], bool]] = {
+    operators.eq: lambda left, right: left == right,
+    operators.ne: lambda left, right: left != right,
+    operators.lt: lambda left, right: left < right,
+    operators.le: lambda left, right: left <= right,
+    operators.gt: lambda left, right: left > right,
+    operators.ge: lambda left, right: left >= right,
+    operators.is_: lambda left, right: left is right,
+    operators.is_not: lambda left, right: left is not right,
+    operators.in_op: lambda left, right: left in right,
+    operators.not_in_op: lambda left, right: left not in right,
+}
+
+
+def _compare_values(operator: Any, left: Any, right: Any) -> bool:
+    """Compare two values using a SQLAlchemy operator.
+
+    Args:
+        operator: The SQLAlchemy operator.
+        left: The left-hand value.
+        right: The right-hand value.
+
+    Returns:
+        Whether the comparison is true.
+    """
+    if left is _MISSING or right is _MISSING:
+        return False
+    comparison = _COMPARISON_FUNCTIONS.get(operator)
+    if comparison is None:
+        return False
+    try:
+        return bool(comparison(left, right))
+    except (TypeError, ValueError):
+        return False
+
+
+def match_row_to_clause(row: Any, clause: Any) -> bool:
+    """Check whether a mocked row matches a SQLAlchemy WHERE clause.
+
+    This is used to apply the effects of ``UPDATE`` and ``DELETE`` statements to
+    dynamically mocked data. Only the common SQLAlchemy operators are supported;
+    clauses that cannot be evaluated against the mocked row return ``False`` so
+    that data is not accidentally mutated.
+
+    Args:
+        row: A model instance or mapping representing a row.
+        clause: The SQLAlchemy WHERE clause.
+
+    Returns:
+        Whether the row matches the clause.
+
+    For example::
+
+        >>> from types import SimpleNamespace
+        >>> from sqlalchemy.sql.expression import column
+        >>> row = SimpleNamespace(name='foo', age=12)
+        >>> match_row_to_clause(row, column('age') >= 18)
+        False
+        >>> match_row_to_clause(row, column('name') == 'foo')
+        True
+        >>> match_row_to_clause(row, (column('name') == 'foo') & (column('age') < 18))
+        True
+    """
+    if clause is None:
+        return True
+    if isinstance(clause, BooleanClauseList):
+        clauses = list(clause.clauses)
+        if clause.operator is operators.or_:
+            return any(match_row_to_clause(row, c) for c in clauses)
+        return all(match_row_to_clause(row, c) for c in clauses)
+    if isinstance(clause, UnaryExpression):
+        return match_row_to_clause(row, clause.element)
+    if isinstance(clause, BinaryExpression):
+        left = _get_expression_value(clause.left, row)
+        right = _get_expression_value(clause.right, row)
+        return _compare_values(clause.operator, left, right)
+    return False

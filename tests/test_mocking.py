@@ -5,8 +5,18 @@ from __future__ import annotations
 from unittest import mock
 
 import pytest
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import delete
+from sqlalchemy import func
+from sqlalchemy import insert
 from sqlalchemy import or_
+from sqlalchemy import select
+from sqlalchemy import text
+from sqlalchemy import update
 from sqlalchemy.orm.exc import MultipleResultsFound
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import column
 
 from mock_alchemy.comparison import ExpressionMatcher
@@ -348,3 +358,209 @@ def test_update_calls() -> None:
     assert 1 == deleted_count
     actual_row = mock_session.query(Model).filter(Model.pk1 == 3).all()
     assert [] == actual_row
+
+
+def test_session_execute_select() -> None:
+    """Tests session.execute with a select statement and dynamic data."""
+    session = UnifiedAlchemyMagicMock()
+    session.add(Model(pk1=1, name="one"))
+    session.add(Model(pk1=2, name="two"))
+
+    assert session.execute(select(Model)).all() == [
+        Model(pk1=1, name="one"),
+        Model(pk1=2, name="two"),
+    ]
+    assert session.execute(select(Model)).scalars().all() == [
+        Model(pk1=1, name="one"),
+        Model(pk1=2, name="two"),
+    ]
+    assert session.execute(select(Model.name)).all() == [("one",), ("two",)]
+    assert session.execute(select(Model.name)).scalars().all() == ["one", "two"]
+
+
+def test_session_execute_stubbed_data() -> None:
+    """Tests session.execute with explicitly stubbed data."""
+    expected = Model(pk1=1, name="one")
+    session = UnifiedAlchemyMagicMock(
+        data=[([mock.call.execute(select(Model))], [expected])]
+    )
+
+    assert session.execute(select(Model)).all() == [expected]
+    assert session.execute(select(Model)).one_or_none() == expected
+    assert session.execute(select(Model)).first() == expected
+    assert session.execute(select(Model)).fetchall() == [expected]
+
+
+def test_session_execute_text_with_params() -> None:
+    """Tests session.execute with raw SQL and parameters."""
+    statement = text("select * from model_table where pk1 = :pk1")
+    session = UnifiedAlchemyMagicMock(
+        data=[
+            (
+                [mock.call.execute(mock.ANY, {"pk1": 1})],
+                [{"pk1": 1, "name": "one"}],
+            )
+        ]
+    )
+
+    result = session.execute(statement, {"pk1": 1})
+    assert result.fetchall() == [{"pk1": 1, "name": "one"}]
+    assert session.execute(statement, {"pk1": 1}).mappings().all() == [
+        {"pk1": 1, "name": "one"}
+    ]
+
+
+def test_session_scalar_methods() -> None:
+    """Tests the session-level scalar methods."""
+    session = UnifiedAlchemyMagicMock()
+    session.add(Model(pk1=1, name="one"))
+
+    assert session.scalar(select(Model)) == Model(pk1=1, name="one")
+    assert session.scalars(select(Model)).all() == [Model(pk1=1, name="one")]
+    assert session.scalar_one(select(Model)) == Model(pk1=1, name="one")
+    assert session.scalar_one_or_none(select(Model)) == Model(pk1=1, name="one")
+
+    session.add(Model(pk1=2, name="two"))
+    with pytest.raises(MultipleResultsFound):
+        session.scalar(select(Model))
+    with pytest.raises(MultipleResultsFound):
+        session.scalar_one(select(Model))
+
+
+def test_session_scalar_no_result() -> None:
+    """Tests session-level scalar methods with no matching data."""
+    session = UnifiedAlchemyMagicMock()
+
+    assert session.scalar(select(Model)) is None
+    assert session.scalar_one_or_none(select(Model)) is None
+    with pytest.raises(NoResultFound):
+        session.scalar_one(select(Model))
+
+
+def test_session_scalar_count() -> None:
+    """Tests scalar methods with an aggregate statement."""
+    session = UnifiedAlchemyMagicMock(
+        data=[([mock.call.execute(select(func.count(Model.pk1)))], [(2,)])]
+    )
+
+    assert session.scalar(select(func.count(Model.pk1))) == 2
+    assert session.execute(select(func.count(Model.pk1))).scalar() == 2
+
+
+def test_query_specific_columns() -> None:
+    """Tests querying specific columns of dynamically added data."""
+    session = UnifiedAlchemyMagicMock()
+    session.add(Model(pk1=1, name="one"))
+    session.add(Model(pk1=2, name="two"))
+
+    assert session.query(Model.name).all() == [("one",), ("two",)]
+    assert session.query(Model.pk1, Model.name).all() == [(1, "one"), (2, "two")]
+
+
+def test_query_with_multiple_models() -> None:
+    """Tests querying multiple models with select_from and join."""
+
+    class Ist(Base):
+        """First model for testing multi-model queries."""
+
+        __tablename__ = "ist_test_models"
+        id = Column(Integer, primary_key=True)
+        strasse = Column(String)
+        kn_ident = Column(Integer)
+
+    class Soll(Base):
+        """Second model for testing multi-model queries."""
+
+        __tablename__ = "soll_test_models"
+        id = Column(Integer, primary_key=True)
+        kn_ident = Column(Integer)
+        querschnitt = Column(Integer)
+
+    ist = Ist(id=1, strasse="1", kn_ident=11)
+    soll = Soll(id=7, kn_ident=11, querschnitt=10)
+    session = UnifiedAlchemyMagicMock(
+        data=[
+            (
+                [
+                    mock.call.query(Ist, Soll),
+                    mock.call.select_from(Ist),
+                    mock.call.join(Soll, Soll.kn_ident == Ist.kn_ident),
+                    mock.call.filter(Ist.strasse == "1"),
+                ],
+                [(ist, soll)],
+            )
+        ]
+    )
+
+    result = (
+        session.query(Ist, Soll)
+        .select_from(Ist)
+        .join(Soll, Soll.kn_ident == Ist.kn_ident)
+        .filter(Ist.strasse == "1")
+        .all()
+    )
+    assert result == [(ist, soll)]
+    session.select_from.assert_called_once_with(Ist)
+
+
+def test_session_close() -> None:
+    """Tests that closing a mocked session is a no-op."""
+    session = UnifiedAlchemyMagicMock()
+    assert session.close() is None
+
+
+def test_with_for_update_unifies() -> None:
+    """Tests that with_for_update participates in a unified query."""
+    session = UnifiedAlchemyMagicMock()
+    assert session.query(Model).filter(Model.pk1 == 1).with_for_update().all() == []
+    session.with_for_update.assert_called_once_with()
+
+
+def test_execute_insert_update_delete() -> None:
+    """Tests that execute applies INSERT, UPDATE, and DELETE mutations."""
+    session = UnifiedAlchemyMagicMock()
+
+    result = session.execute(
+        insert(Model).values([{"pk1": 1, "name": "one"}, {"pk1": 2, "name": "two"}])
+    )
+    assert result.rowcount == 2
+    assert session.execute(select(Model)).scalars().all() == [
+        Model(pk1=1, name="one"),
+        Model(pk1=2, name="two"),
+    ]
+
+    result = session.execute(update(Model).where(Model.pk1 == 1).values(name="updated"))
+    assert result.rowcount == 1
+
+    result = session.execute(delete(Model).where(Model.pk1 == 2))
+    assert result.rowcount == 1
+
+    assert session.execute(select(Model)).scalars().all() == [
+        Model(pk1=1, name="updated")
+    ]
+    assert session.query(Model).all() == [Model(pk1=1, name="updated")]
+
+
+def test_query_len_after_filter_and_pagination() -> None:
+    """Tests len() on a unified query with filters and pagination."""
+    session = UnifiedAlchemyMagicMock()
+    session.add(SomeClass(pk1="123", name="test"))
+
+    assert len(session.query(SomeClass).all()) == 1
+    assert len(session.query(SomeClass).filter(SomeClass.pk1 == "123")) == 1
+    assert len(session.query(SomeClass).limit(10)) == 1
+    assert len(session.query(SomeClass).offset(0)) == 1
+
+
+def test_session_execute_mappings_for_orm_statements() -> None:
+    """Tests mapping results for ORM select statements."""
+    session = UnifiedAlchemyMagicMock()
+    session.add(Model(pk1=1, name="one"))
+
+    entity_mapping = session.execute(select(Model)).mappings().all()
+    assert len(entity_mapping) == 1
+    assert entity_mapping[0]["Model"] == Model(pk1=1, name="one")
+    assert session.execute(select(Model.name)).mappings().all() == [{"name": "one"}]
+    assert session.execute(select(Model.pk1, Model.name)).mappings().all() == [
+        {"pk1": 1, "name": "one"}
+    ]
