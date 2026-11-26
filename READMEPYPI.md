@@ -30,7 +30,7 @@ session in unittests while preserving the ability to do sane asserts.
 
 ## 📚 Documentation
 
-Full documentation is available at <http://mock-alchemy.rtfd.io/>. On
+Full documentation is available at <https://mock-alchemy.rtfd.io/>. On
 the documentation, you should be able to select a version of your choice
 in order to view documentation of an older version if need be.
 
@@ -87,7 +87,7 @@ basic support for deleting, I created my own version of the library.
 Full credit goes to the original creators for starting and building this
 project. You can find the original package on [PyPi][] and [Github][].
 
-[contributor guide]: http://mock-alchemy.rtfd.io/en/latest/contributor_guide
+[contributor guide]: https://mock-alchemy.rtfd.io/en/latest/contributor_guide
 [available]: https://mock-alchemy.readthedocs.io/en/v0.1.0/
 [project page]: https://readthedocs.org/projects/mock-alchemy/
 [pypi]: https://pypi.org/project/alchemy-mock/

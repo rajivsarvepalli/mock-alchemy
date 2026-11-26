@@ -3,7 +3,7 @@
 User Guide
 ==========
 
-There several major uses for this package and I will try to detail out several examples in this guide.
+There are several major uses for this package and I will try to detail out several examples in this guide.
 
 Installation
 --------------
@@ -145,7 +145,7 @@ session is unable to actually apply any filters so it returns everything::
 
 Scalar in Sessions
 ++++++++++++++++++
-You can now mock `scalar() <https://docs.sqlalchemy.org/en/14/orm/query.html#sqlalchemy.orm.Query.scalar>`__.
+You can now mock `scalar() <https://docs.sqlalchemy.org/en/20/orm/query.html#sqlalchemy.orm.Query.scalar>`__.
 There are several limitations with using scalar. One is that when querying on column(s), your mocked data object
 must return an indexable sequence. However, when querying on a table, the returned object must not be indexable.
 This is due to the property of `scalar()` in native SQLAlchemy returning an object when a select is performed on a table and
@@ -695,7 +695,7 @@ Abstract Classes
 ^^^^^^^^^^^^^^^^
 
 It is important to note that mock_alchemy uses Python object attributes instead of SQLAlchemy table attributes. Therefore, please make sure when testing that the column values
-are added as object attributes. Refer to the `SQLAlchemy documentation <https://docs.sqlalchemy.org/en/13/orm/constructors.html>`__ for the details on SQLAlchemy initialization, but for this library,
+are added as object attributes. Refer to the `SQLAlchemy documentation <https://docs.sqlalchemy.org/en/20/orm/constructors.html>`__ for the details on SQLAlchemy initialization, but for this library,
 attributes from Python objects are currently used to get column values. In the below example, this is why the primary key must be created inside the class Concrete's __init__. Normally, this is not a
 concern since if you do not write a constructor for your Python object, SQLAlchemy initializes the attributes for you. However, if you do write a constructor make sure that the class itself has those
 attributes set.
