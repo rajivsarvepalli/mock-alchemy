@@ -184,6 +184,90 @@ returning a specific column value when a select is performed on a column. The be
     assert row1 == found_row
 
 
+SQLAlchemy 2.0 Execution
+++++++++++++++++++++++++
+
+The SQLAlchemy 2.0 style execution API is supported. This includes
+``Session.execute``, ``Session.scalar``, ``Session.scalars``, and the terminal
+methods on returned results such as ``all``, ``fetchall``, ``first``, ``one``,
+``one_or_none``, ``scalar``, ``scalars``, and ``mappings``.
+
+.. code-block:: python
+
+    from unittest import mock
+    from sqlalchemy import Column, Integer, String, select
+    from sqlalchemy.orm import declarative_base
+    from mock_alchemy.mocking import UnifiedAlchemyMagicMock
+
+    Base = declarative_base()
+
+    class MyModel(Base):
+        __tablename__ = "my_model"
+        id = Column(Integer, primary_key=True)
+        name = Column(String)
+
+    session = UnifiedAlchemyMagicMock(
+        data=[
+            (
+                [mock.call.execute(select(MyModel))],
+                [MyModel(id=1, name="foo")],
+            ),
+        ]
+    )
+
+    result = session.execute(select(MyModel))
+    assert result.all() == [MyModel(id=1, name="foo")]
+
+    # Dynamically added data is available through the 2.0 API as well.
+    session = UnifiedAlchemyMagicMock()
+    session.add(MyModel(id=1, name="foo"))
+    assert session.execute(select(MyModel)).scalars().all() == [
+        MyModel(id=1, name="foo")
+    ]
+    assert session.scalar(select(MyModel)).name == "foo"
+
+Raw SQL statements can be mocked by matching the text and parameters:
+
+.. code-block:: python
+
+    from sqlalchemy import text
+
+    session = UnifiedAlchemyMagicMock(
+        data=[
+            (
+                [mock.call.execute(mock.ANY, {"id": 1})],
+                [{"id": 1, "name": "foo"}],
+            ),
+        ]
+    )
+
+    stmt = text("SELECT * FROM my_model WHERE id = :id")
+    assert session.execute(stmt, {"id": 1}).fetchall() == [
+        {"id": 1, "name": "foo"}
+    ]
+    assert session.execute(stmt, {"id": 1}).mappings().all() == [
+        {"id": 1, "name": "foo"}
+    ]
+
+INSERT, UPDATE, and DELETE statements passed to ``execute`` mutate the mocked
+data::
+
+    from sqlalchemy import delete, insert, update
+
+    session = UnifiedAlchemyMagicMock()
+    session.execute(
+        insert(MyModel).values(
+            [{"id": 1, "name": "foo"}, {"id": 2, "name": "bar"}]
+        )
+    )
+    session.execute(update(MyModel).where(MyModel.id == 1).values(name="baz"))
+    session.execute(delete(MyModel).where(MyModel.id == 2))
+
+    assert session.execute(select(MyModel)).scalars().all() == [
+        MyModel(id=1, name="baz")
+    ]
+
+
 Deleting in Sessions
 ++++++++++++++++++++
 
