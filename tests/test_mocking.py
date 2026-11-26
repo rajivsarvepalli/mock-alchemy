@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest import mock
 
 import pytest
 from sqlalchemy import Column
 from sqlalchemy import Integer
+from sqlalchemy import MetaData
 from sqlalchemy import String
+from sqlalchemy import Table
 from sqlalchemy import delete
 from sqlalchemy import func
 from sqlalchemy import insert
@@ -22,8 +25,12 @@ from sqlalchemy.sql.expression import column
 from mock_alchemy.comparison import ExpressionMatcher
 from mock_alchemy.mocking import AlchemyMagicMock
 from mock_alchemy.mocking import UnifiedAlchemyMagicMock
+from mock_alchemy.mocking import UnifiedAlchemyMappingResult
+from mock_alchemy.mocking import UnifiedAlchemyResult
+from mock_alchemy.mocking import UnifiedAlchemyScalarResult
 from mock_alchemy.mocking import UnorderedCall
 from mock_alchemy.mocking import UnorderedTuple
+from mock_alchemy.mocking import _get_selected_column_keys
 from mock_alchemy.mocking import sqlalchemy_call
 from mock_alchemy.sql_alchemy_imports import declarative_base
 
@@ -564,3 +571,271 @@ def test_session_execute_mappings_for_orm_statements() -> None:
     assert session.execute(select(Model.pk1, Model.name)).mappings().all() == [
         {"pk1": 1, "name": "one"}
     ]
+
+
+def test_scalar_result_object() -> None:
+    """Tests the scalar result view returned by scalars()."""
+    result = UnifiedAlchemyScalarResult([(1,), (2,)])
+    assert result.fetchall() == [1, 2]
+    assert list(result) == [1, 2]
+    assert len(result) == 2
+    assert result.first() == 1
+    assert result.unique() is result
+    assert result.freeze() is result
+    with pytest.raises(MultipleResultsFound):
+        result.one()
+    with pytest.raises(MultipleResultsFound):
+        result.one_or_none()
+
+    assert UnifiedAlchemyScalarResult([1]).all() == [1]
+
+    empty = UnifiedAlchemyScalarResult([])
+    assert empty.first() is None
+    assert empty.one_or_none() is None
+    with pytest.raises(NoResultFound):
+        empty.one()
+
+    single = UnifiedAlchemyScalarResult([(1,)])
+    assert single.one() == 1
+    assert single.one_or_none() == 1
+
+
+def test_mapping_result_object() -> None:
+    """Tests the mapping result view returned by mappings()."""
+    statement = select(Model.pk1, Model.name)
+    result = UnifiedAlchemyMappingResult([(1, "one")], statement=statement)
+    expected = {"pk1": 1, "name": "one"}
+    assert result.fetchall() == [expected]
+    assert list(result) == [expected]
+    assert len(result) == 1
+    assert result.first() == expected
+    assert result.one() == expected
+    assert result.one_or_none() == expected
+    assert result.unique() is result
+    assert result.freeze() is result
+
+    multiple = UnifiedAlchemyMappingResult([(1,), (2,)], statement=select(Model.pk1))
+    with pytest.raises(MultipleResultsFound):
+        multiple.one()
+    with pytest.raises(MultipleResultsFound):
+        multiple.one_or_none()
+
+    empty = UnifiedAlchemyMappingResult([], statement=select(Model.pk1))
+    assert empty.first() is None
+    assert empty.one_or_none() is None
+    with pytest.raises(NoResultFound):
+        empty.one()
+
+    assert UnifiedAlchemyMappingResult([(1, 2)], statement=select(Model.pk1)).all() == [
+        {0: 1, 1: 2}
+    ]
+    assert UnifiedAlchemyMappingResult([(1, 2)]).all() == [{0: 1, 1: 2}]
+    assert UnifiedAlchemyMappingResult([5]).all() == [5]
+    assert UnifiedAlchemyMappingResult(
+        [SimpleNamespace()], statement=select(Model.pk1, Model.name)
+    ).all() == [SimpleNamespace()]
+
+
+def test_result_object_helpers() -> None:
+    """Tests the SQLAlchemy Result-like helper methods."""
+    result = UnifiedAlchemyResult([(1,), (2,)], rowcount=2)
+    assert result.count() == 2
+    assert result.unique() is result
+    assert result.freeze() is result
+    assert result.close() is None
+    assert list(result) == [(1,), (2,)]
+    assert len(result) == 2
+    assert result[0] == (1,)
+    assert result.rowcount == 2
+    assert result.fetchall() == [(1,), (2,)]
+    assert result.fetchone() == (1,)
+    assert result.first() == (1,)
+    with pytest.raises(MultipleResultsFound):
+        result.scalar()
+    with pytest.raises(MultipleResultsFound):
+        result.one()
+    with pytest.raises(MultipleResultsFound):
+        result.one_or_none()
+
+    empty = UnifiedAlchemyResult([])
+    assert empty.fetchone() is None
+    assert empty.first() is None
+    assert empty.scalar() is None
+    assert empty.one_or_none() is None
+    with pytest.raises(NoResultFound):
+        empty.one()
+    assert empty.mappings().all() == []
+
+    single = UnifiedAlchemyResult([(1,)])
+    assert single.scalar() == 1
+    assert single.one() == (1,)
+    assert single.one_or_none() == (1,)
+
+
+def test_get_selected_column_keys() -> None:
+    """Tests extracting selected column keys from statements."""
+    assert _get_selected_column_keys(None) == []
+    assert (
+        _get_selected_column_keys(
+            SimpleNamespace(column_descriptions=[{"expr": object()}])
+        )
+        == []
+    )
+    assert _get_selected_column_keys(
+        SimpleNamespace(column_descriptions=[{"expr": object()}, {"expr": Model.pk1}])
+    ) == ["pk1"]
+    assert _get_selected_column_keys(SimpleNamespace(column_descriptions=[])) == []
+    assert _get_selected_column_keys(
+        SimpleNamespace(
+            column_descriptions=[], selected_columns=[SimpleNamespace(key="pk1")]
+        )
+    ) == ["pk1"]
+
+
+def test_project_rows_with_unmatched_row() -> None:
+    """Tests projecting rows that do not have the requested attributes."""
+    model = Model(pk1=1, name="one")
+    row = SimpleNamespace()
+    assert UnifiedAlchemyMagicMock._project_rows([model, row], [Model.pk1]) == [
+        (1,),
+        row,
+    ]
+
+
+def test_execute_where_filters_dynamic_rows() -> None:
+    """Tests execute(select(...).where(...)) filters dynamically added rows."""
+    session = UnifiedAlchemyMagicMock()
+    session.add(Model(pk1=1, name="one"))
+    session.add(Model(pk1=2, name="two"))
+
+    assert session.execute(select(Model).where(Model.pk1 == 2)).scalars().all() == [
+        Model(pk1=2, name="two")
+    ]
+
+
+def test_execute_mixed_select_returns_rows() -> None:
+    """Tests execute with mixed expressions returns the base rows."""
+    session = UnifiedAlchemyMagicMock()
+    session.add(Model(pk1=1, name="one"))
+
+    result = session.execute(
+        select(Model.pk1, func.count(Model.pk1)).where(Model.pk1 == 1)
+    )
+    assert result.all() == [Model(pk1=1, name="one")]
+
+
+def test_filter_statement_rows_without_entity() -> None:
+    """Tests statement row filtering when descriptions are unavailable."""
+    session = UnifiedAlchemyMagicMock()
+    assert session._filter_statement_rows(SimpleNamespace(), []) is None
+    assert (
+        session._filter_statement_rows(
+            SimpleNamespace(column_descriptions=[{"entity": None}]), []
+        )
+        is None
+    )
+
+
+def test_dml_attribute_names() -> None:
+    """Tests resolving model attribute names for DML columns."""
+    session = UnifiedAlchemyMagicMock()
+    assert session._get_attribute_name(None, "name") == "name"
+    assert session._get_attribute_name(Model, Model.pk1) == "pk1"
+    assert session._get_attribute_name(Model, SomeClass.pk2) == "pk2"
+    assert session._get_attribute_name(Model, column("name")) == "name"
+    expression = object()
+    assert session._get_attribute_name(None, expression) is expression
+
+
+def test_object_matches_statement() -> None:
+    """Tests determining whether mocked data belongs to a DML statement."""
+    session = UnifiedAlchemyMagicMock()
+    table = object()
+    row = SimpleNamespace(__table__=table)
+
+    assert session._object_matches_statement(row, None, table)
+    assert session._object_matches_statement({"pk1": 1}, None, None)
+    assert session._object_matches_statement(Model(pk1=1), Model, None)
+
+
+def test_execute_insert_variants() -> None:
+    """Tests INSERT execution with different parameter forms."""
+    session = UnifiedAlchemyMagicMock()
+
+    assert session.execute(insert(Model), [{"pk1": 1, "name": "one"}]).rowcount == 1
+    assert session.execute(insert(Model), {"pk1": 2, "name": "two"}).rowcount == 1
+    assert session.execute(insert(Model), [Model(pk1=3, name="three")]).rowcount == 1
+
+    metadata = MetaData()
+    table = Table(
+        "core_table", metadata, Column("pk1", Integer), Column("name", String)
+    )
+    assert session.execute(insert(table).values(pk1=4, name="four")).rowcount == 1
+    assert session.execute(insert(Model)).rowcount == 0
+
+    session.add({})
+
+    assert session.execute(select(Model)).scalars().all() == [
+        Model(pk1=1, name="one"),
+        Model(pk1=2, name="two"),
+        Model(pk1=3, name="three"),
+    ]
+
+
+def test_execute_insert_sequence_row() -> None:
+    """Tests INSERT execution with a non-mapping row sequence."""
+    session = UnifiedAlchemyMagicMock()
+    statement = SimpleNamespace(
+        entity_description={"type": Model},
+        _multi_values=None,
+        _values=None,
+    )
+    params = iter([("pk1", 1), ("name", "one")])
+
+    result = session._execute_insert(statement, [params], {})
+
+    assert result.rowcount == 1
+    assert session.query(Model).all() == [Model(pk1=1, name="one")]
+
+
+def test_execute_update_ignores_other_model_rows() -> None:
+    """Tests UPDATE execution skips rows from other model types."""
+    session = UnifiedAlchemyMagicMock()
+    session.add(Model(pk1=1, name="one"))
+    session.add(SomeClass(pk1=1, pk2=1, name="other"))
+
+    result = session.execute(update(Model).where(Model.pk1 == 1).values(name="updated"))
+
+    assert result.rowcount == 1
+    assert session.query(Model).all() == [Model(pk1=1, name="updated")]
+    assert session.query(SomeClass).all() == [SomeClass(pk1=1, pk2=1, name="other")]
+
+
+def test_execute_update_mapping_row() -> None:
+    """Tests UPDATE execution mutates mapping rows associated with a table."""
+    session = UnifiedAlchemyMagicMock()
+    metadata = MetaData()
+    table = Table(
+        "update_table", metadata, Column("pk1", Integer), Column("name", String)
+    )
+
+    class TableRow(dict):
+        """A mapping row linked to a SQLAlchemy table."""
+
+    row = TableRow(pk1=1, name="one")
+    row.__table__ = table
+    session.add(row)
+
+    result = session._execute_update(
+        update(table).where(table.c.pk1 == 1).values(name="updated"), [], {}
+    )
+
+    assert result.rowcount == 1
+    assert row["name"] == "updated"
+
+
+def test_execute_empty_session_and_no_args() -> None:
+    """Tests execute with no statement and with no stubbed data."""
+    session = UnifiedAlchemyMagicMock()
+    assert session.execute().all() == []
+    assert session.execute(select(Model)).all() == []
