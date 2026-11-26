@@ -8,7 +8,7 @@ Versioning
 ----------
 
 There are several different versions of ``mock-alchemy`` available depending on your needs. The versions ``0.1.x`` are available for use on
-Python 2.7, Python 3.6+. The newer versions serve users who are on Python 3.7+. For people interested in contributing, if you want to work
+Python 2.7, Python 3.6+. The newer versions serve users who are on Python 3.10+. For people interested in contributing, if you want to work
 on Python 2.7 version checkout the branch `0.1.x` and then create pull-requests to that branch. There is a set of specific tests run for that
 branch on pushes and pull-requests since there are different tests for the newer versions of ``mock-alchemy``. Check out :ref:`contributor guide <contributor_guide>`
 for more information. Documentation for the 0.1.0 version is `available <https://mock-alchemy.readthedocs.io/en/v0.1.0/>`__. However, the current documentation should do a sufficient

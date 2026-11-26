@@ -1,4 +1,5 @@
 """Testing the module for unittests in mock-alchemy."""
+
 import unittest
 
 import pytest

@@ -1,4 +1,5 @@
 """Testing the module for utils in mock-alchemy."""
+
 import pytest
 from sqlalchemy.orm.exc import MultipleResultsFound
 
@@ -66,7 +67,7 @@ def test_raiser() -> None:
     _ = test_func(True)
     with pytest.raises(ValueError) as excinfo:
         _ = test_func(False)
-        assert "error message" in str(excinfo.value)
+    assert "error message" in str(excinfo.value)
 
 
 def test_idmap() -> None:

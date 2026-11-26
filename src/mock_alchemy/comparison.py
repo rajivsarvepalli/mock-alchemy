@@ -1,4 +1,5 @@
 """A module for comparing SQLAlchemy expressions."""
+
 from __future__ import absolute_import
 from __future__ import annotations
 from __future__ import print_function
@@ -10,8 +11,6 @@ from typing import Any
 from typing import Optional
 from unittest import mock
 
-import sqlalchemy
-from packaging import version
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.sql.expression import column
@@ -20,20 +19,21 @@ from sqlalchemy.sql.expression import or_
 from .utils import match_type
 
 ALCHEMY_UNARY_EXPRESSION_TYPE = type(column("").asc())
-ALCHEMY_BINARY_EXPRESSION_TYPE = type(column("") == "")
-ALCHEMY_BOOLEAN_CLAUSE_LIST = type(or_(column("") == "", column("").is_(None)))
+ALCHEMY_BINARY_EXPRESSION_TYPE = type(column("") == "")  # noqa: E721
+ALCHEMY_BOOLEAN_CLAUSE_LIST = type(  # noqa: E721
+    or_(column("") == "", column("").is_(None))
+)  # noqa: E721
 ALCHEMY_FUNC_TYPE = type(func.dummy(column("")))
 ALCHEMY_LABEL_TYPE = type(column("").label(""))
+ALCHEMY_SELECT_TYPE = type(select(column("")))
 ALCHEMY_TYPES = (
     ALCHEMY_UNARY_EXPRESSION_TYPE,
     ALCHEMY_BINARY_EXPRESSION_TYPE,
     ALCHEMY_BOOLEAN_CLAUSE_LIST,
     ALCHEMY_FUNC_TYPE,
     ALCHEMY_LABEL_TYPE,
+    ALCHEMY_SELECT_TYPE,
 )
-if version.parse(sqlalchemy.__version__) >= version.parse("1.4.0"):
-    ALCHEMY_SELECT_TYPE = type(select(column("")))
-    ALCHEMY_TYPES += (ALCHEMY_SELECT_TYPE,)
 
 
 class PrettyExpression(object):

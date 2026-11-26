@@ -1,4 +1,5 @@
 """Testing the module for mocking in mock-alchemy."""
+
 from __future__ import annotations
 
 from unittest import mock

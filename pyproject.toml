@@ -15,11 +15,10 @@ classifiers=[
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Development Status :: 2 - Pre-Alpha",
 ]
 
@@ -27,38 +26,40 @@ classifiers=[
 Changelog = "https://github.com/rajivsarvepalli/mock-alchemy/releases"
 
 [tool.poetry.dependencies]
-packaging = "^23.0"
-python = "^3.7"
+packaging = "^26.4"
+python = "^3.10"
 SQLAlchemy = "^2.0.6"
 
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.2.2"
-coverage = {extras = ["toml"], version = "^7.2"}
-pytest-cov = "^4.0.0"
-black = "^23.3.0"
-flake8 = "^3.9.1"
-flake8-bandit = "^3.0.0"
-flake8-bugbear = "^21.4.3"
-flake8-import-order = "^0.18.1"
-safety = "^2.3.4"
-mypy = "^1.1"
-typeguard = "^2.10.0"
-flake8-annotations = "^2.4.1"
-flake8-docstrings = "^1.6.0"
-darglint = "^1.8.1"
-xdoctest = "^1.1.1"
-Sphinx = "^5.3.0"
-codecov = "^2.1.11"
-pydata-sphinx-theme = "^0.13.3"
-sphinx-copybutton = "^0.5.1"
-pep8-naming = "^0.12.1"
-Pygments = "^2.9.0"
-sphinx-autodoc-typehints = "^1.12.0"
-flake8-rst-docstrings = "^0.3.0"
-pre-commit = "^2.21.0"
-pre-commit-hooks = "^4.0.1"
-isort = "^5.9.3"
+pytest = {version = "^9.2.0", python = ">=3.11"}
+coverage = {extras = ["toml"], version = "^7.17.5", python = ">=3.11"}
+pytest-cov = {version = "^7.1.0", python = ">=3.11"}
+black = {version = "^26.10.1", python = ">=3.11"}
+flake8 = {version = "^7.5.0", python = ">=3.11"}
+flake8-bandit = {version = "^4.1.1", python = ">=3.11"}
+flake8-bugbear = {version = "^26.11.22", python = ">=3.11"}
+flake8-import-order = {version = "^0.19.2", python = ">=3.11"}
+mypy = {version = "^2.4.1", python = ">=3.11"}
+typeguard = {version = "^4.6.1", python = ">=3.11"}
+flake8-annotations = {version = "^3.3.1", python = ">=3.11"}
+flake8-docstrings = {version = "^1.7.0", python = ">=3.11"}
+darglint = {version = "^1.8.1", python = ">=3.11"}
+xdoctest = {version = "^1.3.2", python = ">=3.11"}
+Sphinx = {version = "9.0.4", python = ">=3.11"}
+pydata-sphinx-theme = {version = "^0.24.0", python = ">=3.11"}
+sphinx-copybutton = {version = "^0.5.2", python = ">=3.11"}
+pep8-naming = {version = "^0.15.1", python = ">=3.11"}
+Pygments = {version = "^2.21.0", python = ">=3.11"}
+sphinx-autodoc-typehints = {version = "==3.6.1", python = ">=3.11"}
+flake8-rst-docstrings = {version = "^0.4.0", python = ">=3.11"}
+pre-commit = {version = "^4.7.0", python = ">=3.11"}
+pre-commit-hooks = {version = "^6.0.0", python = ">=3.11"}
+isort = {version = "^9.0.2", python = ">=3.11"}
+setuptools = {version = "^84.1.0", python = ">=3.11"}
+filelock = {version = "^4.3.1", python = ">=3.11"}
+soupsieve = {version = "^2.9.1", python = ">=3.11"}
+virtualenv = {version = "^21.14.9", python = ">=3.11"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -1,4 +1,5 @@
 """Nox sessions."""
+
 import shutil
 import sys
 from pathlib import Path
@@ -9,8 +10,8 @@ from nox_poetry import Session
 from nox_poetry import session
 
 package = "mock_alchemy"
-python_versions = ["3.7", "3.8", "3.9", "3.10", "3.11"]
-sqlalchemy_versions = ["1.3.22", "1.4.0", "2.0.4"]
+python_versions = ["3.10", "3.11"]
+sqlalchemy_versions = ["2.0.6", "2.0.58"]
 nox.options.sessions = (
     "pre-commit",
     "safety",
@@ -57,22 +58,20 @@ def activate_virtualenv_in_precommit_hooks(session: Session) -> None:
         if not (lines[0].startswith("#!") and "python" in lines[0].lower()):
             continue
 
-        header = dedent(
-            f"""\
+        header = dedent(f"""\
             import os
             os.environ["VIRTUAL_ENV"] = {virtualenv!r}
             os.environ["PATH"] = os.pathsep.join((
                 {session.bin!r},
                 os.environ.get("PATH", ""),
             ))
-            """
-        )
+            """)
 
         lines.insert(1, header)
         hook.write_text("\n".join(lines))
 
 
-@session(name="pre-commit", python="3.8")
+@session(name="pre-commit", python="3.11")
 def precommit(session: Session) -> None:
     """Lint using pre-commit."""
     args = session.posargs or ["run", "--all-files"]
@@ -96,11 +95,14 @@ def precommit(session: Session) -> None:
         activate_virtualenv_in_precommit_hooks(session)
 
 
-@session(python="3.8")
+@session(python="3.11")
 def safety(session: Session) -> None:
     """Scan dependencies for insecure packages."""
     requirements = session.poetry.export_requirements()
-    session.install("safety")
+    # Install the Safety CLI without the project dependency constraints.
+    # Safety itself requires filelock<4, which conflicts with the current
+    # security-patched virtualenv stack used by the project.
+    session.run("python", "-m", "pip", "install", "safety")
     session.run("safety", "check", f"--file={requirements}", "--bare")
 
 
@@ -121,7 +123,7 @@ def tests(session: Session, sqlalchemy: str) -> None:
     """Run the test suite."""
     session.install(".")
     # TODO: Revisit how to parameterize sessions for different sqlalchemy versions
-    session.run("pip", "install", f"sqlalchemy~={sqlalchemy}")
+    session.run("pip", "install", f"sqlalchemy=={sqlalchemy}")
     session.install("coverage[toml]", "pytest", "pygments")
     try:
         session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
@@ -162,7 +164,7 @@ def xdoctest(session: Session) -> None:
     session.run("python", "-m", "xdoctest", package, *args)
 
 
-@session(name="docs-build", python="3.8")
+@session(name="docs-build", python="3.11")
 def docs_build(session: Session) -> None:
     """Build the documentation."""
     args = session.posargs or ["docs", "docs/_build"]
@@ -178,7 +180,7 @@ def docs_build(session: Session) -> None:
     session.run("sphinx-build", *args)
 
 
-@session(python="3.8")
+@session(python="3.11")
 def docs(session: Session) -> None:
     """Build and serve the documentation with live reloading on file changes."""
     args = session.posargs or ["--open-browser", "docs", "docs/_build"]

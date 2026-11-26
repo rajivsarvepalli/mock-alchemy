@@ -61,7 +61,7 @@ version is downloaded for your needs.
 There are several different versions of `mock-alchemy` available
 depending on your needs. The versions `0.1.x` are available for use on
 Python 2.7, Python 3.6+. The newer versions serve users who are on
-Python 3.7+. For people interested in contributing, if you want to work
+Python 3.10+. For people interested in contributing, if you want to work
 on Python 2.7 version checkout the branch <span
 class="title-ref">0.1.x</span> and then create pull-requests to that
 branch. There is a set of specific tests run for that branch on pushes
